@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { TerminalCommand } from '@npm-browser/shared';
 
 export class BrowserWebView {
 
@@ -24,7 +25,7 @@ export class BrowserWebView {
         'vendor.js'
     ];
 
-    constructor(context: vscode.ExtensionContext, private onTerminalCommand: ((command: any) => void), production = false) {
+    constructor(context: vscode.ExtensionContext, private onTerminalCommand: ((command: TerminalCommand) => void), production = false) {
         this.context = context;
 
         // Create and show a new webview

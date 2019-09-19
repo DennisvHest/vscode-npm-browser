@@ -1,11 +1,12 @@
 import * as vscode from 'vscode';
 import { BrowserWebView } from './app/BrowserWebView';
+import { TerminalCommand } from '@npm-browser/shared';
 
 export function activate(context: vscode.ExtensionContext) {
 
 	const terminal = vscode.window.createTerminal('Install package');
 
-	function runTerminalCommand(command: any) {
+	function runTerminalCommand(command: TerminalCommand) {
 		terminal.show();
 		terminal.sendText(command.command, true);
 	}
@@ -14,9 +15,7 @@ export function activate(context: vscode.ExtensionContext) {
 		const browser = new BrowserWebView(context, runTerminalCommand, true);
 	});
 
-	//runTerminalCommand({ command: 'abcdefg'});
-
-	//context.subscriptions.push(disposable);
+	context.subscriptions.push(disposable);
 }
 
 

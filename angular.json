@@ -34,7 +34,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/apps/extension/browser",
+            "outputPath": "dist/apps/extension/src/browser",
             "index": "apps/browser/src/index.html",
             "main": "apps/browser/src/main.ts",
             "polyfills": "apps/browser/src/polyfills.ts",
@@ -114,13 +114,8 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": [
-              "apps/browser/tsconfig.app.json"
-            ],
-            "exclude": [
-              "**/node_modules/**",
-              "!apps/browser/**"
-            ]
+            "tsConfig": ["apps/browser/tsconfig.app.json"],
+            "exclude": ["**/node_modules/**", "!apps/browser/**"]
           }
         }
       }
@@ -167,13 +162,23 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": [
-              "apps/extension/tsconfig.app.json"
-            ],
-            "exclude": [
-              "**/node_modules/**",
-              "!apps/extension/**"
-            ]
+            "tsConfig": ["apps/extension/tsconfig.app.json"],
+            "exclude": ["**/node_modules/**", "!apps/extension/**"]
+          }
+        }
+      }
+    },
+    "shared": {
+      "root": "libs/shared",
+      "sourceRoot": "libs/shared/src",
+      "projectType": "library",
+      "schematics": {},
+      "architect": {
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": ["libs/shared/tsconfig.lib.json"],
+            "exclude": ["**/node_modules/**", "!libs/shared/**"]
           }
         }
       }

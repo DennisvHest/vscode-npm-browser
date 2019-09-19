@@ -14,11 +14,12 @@
         },
         {
             "label": "copy-package-json",
-            "command": "copy",
+            "command": "xcopy",
             "type": "shell",
             "args": [
-                "\"apps/extension/src/package.json\"",
-                "\"dist/apps/extension/package.json\""
+                "\"apps\\extension\\src\\package.json\"",
+                "\"dist\\apps\\extension\\src\\package.json*\"",
+                "/y",
             ],
         },
         {

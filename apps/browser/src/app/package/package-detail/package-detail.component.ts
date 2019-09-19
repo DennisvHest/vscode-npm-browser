@@ -6,7 +6,7 @@ import { Store, select } from '@ngrx/store';
 import { getCurrentPackage } from '../../state/state.selectors';
 import { FormGroup, FormControl } from '@angular/forms';
 import { installPackage } from '../../state/state.actions';
-//import { NpmInstallCommand } from '../../../../../shared/commands/npm-install-command';
+import { NpmInstallCommand } from '@npm-browser/shared';
 
 @Component({
   selector: 'npmb-package-detail',
@@ -46,12 +46,7 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
 
     const value = this.packageInstallForm.value;
 
-    const installCommand: any = {};//new NpmInstallCommand();
-
-    installCommand.packageName = value.name;
-    installCommand.packageVersion = value.version;
-    installCommand.command = `npm install ${installCommand.packageName}@${installCommand.packageVersion} --dry-run`;
-    installCommand.type = 'npm-install';
+    const installCommand = new NpmInstallCommand(value.name, value.version);
 
     this.store.dispatch(installPackage({ value: installCommand }));
   }

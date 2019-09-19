@@ -13,6 +13,9 @@
     },
     "extension": {
       "tags": []
+    },
+    "shared": {
+      "tags": []
     }
   }
 }
