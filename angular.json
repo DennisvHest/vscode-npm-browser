@@ -1,7 +1,195 @@
 {
   "version": 1,
-  "projects": {},
+  "projects": {
+    "browser": {
+      "projectType": "application",
+      "schematics": {
+        "@nrwl/angular:class": {
+          "skipTests": true
+        },
+        "@nrwl/angular:component": {
+          "style": "less",
+          "skipTests": true
+        },
+        "@nrwl/angular:directive": {
+          "skipTests": true
+        },
+        "@nrwl/angular:guard": {
+          "skipTests": true
+        },
+        "@nrwl/angular:module": {
+          "skipTests": true
+        },
+        "@nrwl/angular:pipe": {
+          "skipTests": true
+        },
+        "@nrwl/angular:service": {
+          "skipTests": true
+        }
+      },
+      "root": "apps/browser",
+      "sourceRoot": "apps/browser/src",
+      "prefix": "npmb",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/apps/extension/browser",
+            "index": "apps/browser/src/index.html",
+            "main": "apps/browser/src/main.ts",
+            "polyfills": "apps/browser/src/polyfills.ts",
+            "tsConfig": "apps/browser/tsconfig.app.json",
+            "aot": false,
+            "assets": [
+              "apps/browser/src/favicon.ico",
+              "apps/browser/src/assets"
+            ],
+            "styles": [
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "apps/browser/src/vscode-styles.css",
+              "node_modules/prismjs/themes/prism-okaidia.css",
+              "apps/browser/src/styles.less"
+            ],
+            "scripts": [
+              "node_modules/marked/lib/marked.js",
+              "node_modules/prismjs/prism.js",
+              "node_modules/prismjs/components/prism-javascript.min.js",
+              "node_modules/prismjs/components/prism-json.min.js",
+              "node_modules/prismjs/components/prism-css.min.js",
+              "node_modules/prismjs/components/prism-less.min.js",
+              "node_modules/prismjs/components/prism-sass.min.js",
+              "node_modules/prismjs/components/prism-scss.min.js",
+              "node_modules/prismjs/components/prism-typescript.min.js"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "apps/browser/src/environments/environment.ts",
+                  "with": "apps/browser/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "none",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "aot": true,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "browser:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "browser:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "browser:build"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "apps/browser/tsconfig.app.json"
+            ],
+            "exclude": [
+              "**/node_modules/**",
+              "!apps/browser/**"
+            ]
+          }
+        }
+      }
+    },
+    "extension": {
+      "root": "apps/extension",
+      "sourceRoot": "apps/extension/src",
+      "projectType": "application",
+      "prefix": "extension",
+      "schematics": {},
+      "architect": {
+        "build": {
+          "builder": "@nrwl/node:build",
+          "options": {
+            "outputPath": "dist/apps/extension",
+            "main": "apps/extension/src/main.ts",
+            "tsConfig": "apps/extension/tsconfig.app.json",
+            "assets": [
+              "apps/extension/src/package.json",
+              "apps/extension/src/assets"
+            ]
+          },
+          "configurations": {
+            "production": {
+              "externalDependencies": ["vscode"],
+              "optimization": false,
+              "extractLicenses": true,
+              "inspect": true,
+              "fileReplacements": [
+                {
+                  "replace": "apps/extension/src/environments/environment.ts",
+                  "with": "apps/extension/src/environments/environment.prod.ts"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@nrwl/node:execute",
+          "options": {
+            "buildTarget": "extension:build"
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "apps/extension/tsconfig.app.json"
+            ],
+            "exclude": [
+              "**/node_modules/**",
+              "!apps/extension/**"
+            ]
+          }
+        }
+      }
+    }
+  },
   "cli": {
-    "defaultCollection": "@nrwl/workspace"
-  }
+    "defaultCollection": "@nrwl/angular"
+  },
+  "schematics": {
+    "@nrwl/angular:application": {
+      "unitTestRunner": "none",
+      "e2eTestRunner": "none"
+    },
+    "@nrwl/angular:library": {
+      "unitTestRunner": "none"
+    }
+  },
+  "defaultProject": "browser"
 }

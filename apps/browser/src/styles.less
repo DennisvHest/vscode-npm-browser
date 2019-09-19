@@ -1,0 +1,114 @@
+html,
+body {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    padding: 0;
+    color: var(--vscode-editor-foreground);
+}
+
+img {
+    max-width: 100%;
+}
+
+npmb-package-detail .tab-content {
+    position: absolute;
+    overflow-y: auto;
+    bottom: 0;
+    top: 50px;
+    padding-top: 20px;
+    left: 0;
+    right: 0;
+}
+
+/* Bootstrap overrides */
+.list-group-item {
+    background-color: transparent;
+    color: inherit;
+
+    h5 {
+        color: inherit;
+        font-weight: bold;
+        font-size: inherit;
+    }
+
+    &.active {
+        background-color: var(--vscode-titleBar-activeBackground);
+        border-color: var(--vscode-titleBar-activeBackground);
+    }
+}
+
+.list-group-item-action:focus:not(.active),
+.list-group-item-action:hover:not(.active) {
+    cursor: pointer;
+    color: var(--vscode-button-foreground);
+    background-color: var(--vscode-editor-rangeHighlightBackground);
+}
+
+.form-control,
+.form-control:focus {
+    background-color: var(--vscode-settings-textInputBackground);
+    color: var(--vscode-settings-textInputForeground);
+    border: none;
+    border-radius: 0;
+}
+
+.btn {
+    border-radius: 0;
+}
+
+.btn-primary {
+    background-color: var(--vscode-statusBar-background);
+}
+
+.alert-info {
+    color: var(--vscode-editor-foreground);
+    background-color: var(--vscode-settings-textInputBackground);
+    border: none;
+}
+
+hr {
+    border-color: var(--vscode-settings-dropdownListBorder);
+}
+
+.nav-tabs {
+    border-bottom: 1px solid var(--vscode-settings-dropdownListBorder);
+    margin-bottom: 20px;
+
+    .nav-link {
+        color: var(--vscode-tab-inactiveForeground);
+        font-weight: bold;
+        font-size: 16px;
+
+        &, &.active {
+            &, &:hover {
+                background-color: transparent;
+                border-color: transparent;
+            }
+        }
+
+        &.active {
+            color: var(--vscode-editor-foreground);
+            text-decoration: underline;
+        }
+    }
+}
+
+/* Markdown overrides */
+markdown {
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: normal;
+    }
+}
+
+/* Prism.js overrides */
+pre {
+    background-color: var(--vscode-textCodeBlock-background) !important;
+}
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: var(--vscode-editor-foreground);
+}

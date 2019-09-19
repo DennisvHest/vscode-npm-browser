@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "outDir": "../../dist/apps/extension",
+    "rootDir": "src",
+    "lib": [
+      "es6"
+    ],
+    "sourceMap": true,
+    "strict": true
+  },
+  "exclude": [
+    "**/*.spec.ts"
+  ],
+  "include": [
+    "**/*.ts"
+  ]
+}

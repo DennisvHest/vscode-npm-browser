@@ -1,0 +1,15 @@
+<div class="row">
+    <div class="col-3 search-panel">
+        <form [formGroup]="searchForm" (ngSubmit)="search()">
+            <input #searchTextInput id="search-text-input" type="text" formControlName="searchText" placeholder="Search NPM packages..." class="form-control">
+        </form>
+        <npmb-package-list 
+            [packages]="packages$ | async" 
+            [activePackageName]="currentPackageName$ | async" 
+            (packageSelected)="onPackageSelected($event)">
+        </npmb-package-list>
+    </div>
+    <div class="col-9 offset-3">
+        <npmb-package-detail></npmb-package-detail>
+    </div>
+</div>

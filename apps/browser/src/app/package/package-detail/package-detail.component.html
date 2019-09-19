@@ -1,0 +1,47 @@
+<ng-container *ngIf="(package$ | async) as npmPackage">
+    <div id="package-header" class="row">
+        <div>
+            <fa-icon [icon]="['fas', 'cube']" size="10x"></fa-icon>
+        </div>
+        <div class="col">
+            <h1>{{ npmPackage.name }}</h1>
+            <h6>{{ npmPackage.author.name }}</h6>
+            <p>{{ npmPackage.description }}</p>
+            <form [formGroup]="packageInstallForm" (ngSubmit)="installPackage()">
+                <div class="input-group">
+                    <select formControlName="version" class="form-control">
+                        <option *ngFor="let version of npmPackage.versions.reverse()" [ngValue]="version.version">
+                            {{ version.version }}<ng-container *ngIf="version.distTags.length" > ({{ version.distTags.join(', ') }})</ng-container>
+                        </option>
+                    </select>
+                    <div class="input-group-append">
+                        <button type="submit" class="btn btn-primary">Install</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    <ngb-tabset>
+        <ngb-tab title="Readme">
+            <ng-template ngbTabContent>
+                <div class="row">
+                    <div class="col">
+                        <markdown *ngIf="npmPackage.readme" ngPreserveWhitespaces [data]="npmPackage.readme"></markdown>
+                        <div *ngIf="!npmPackage.readme" class="alert alert-info">
+                            <fa-icon [icon]="['fas', 'info-circle']"></fa-icon> This package does not have a readme.
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+        </ngb-tab>
+        <ngb-tab title="Versions">
+            <ng-template ngbTabContent>
+                <div class="row">
+                    <div class="col">
+                        <p>Versions</p>
+                    </div>
+                </div>
+            </ng-template>
+        </ngb-tab>
+    </ngb-tabset>
+</ng-container>

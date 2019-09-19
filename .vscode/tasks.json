@@ -1,0 +1,32 @@
+// See https://go.microsoft.com/fwlink/?LinkId=733558
+// for the documentation about the tasks.json format
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build-extension-src",
+            "command": "npm",
+            "type": "shell",
+            "args": [
+                "run",
+                "build-extension"
+            ],
+        },
+        {
+            "label": "copy-package-json",
+            "command": "copy",
+            "type": "shell",
+            "args": [
+                "\"apps/extension/src/package.json\"",
+                "\"dist/apps/extension/package.json\""
+            ],
+        },
+        {
+            "label": "build-extension",
+            "dependsOn": [
+                "build-extension-src",
+                "copy-package-json"
+            ]
+        }
+    ]
+}

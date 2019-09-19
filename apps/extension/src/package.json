@@ -1,0 +1,24 @@
+{
+	"name": "npm-browser",
+	"displayName": "NPM Browser",
+	"description": "",
+	"version": "0.5.0",
+	"engines": {
+		"vscode": "^1.37.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [
+		"onCommand:npmBrowser.open"
+	],
+	"main": "./main.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "npmBrowser.open",
+				"title": "Open NPM Browser"
+			}
+		]
+	}
+}
