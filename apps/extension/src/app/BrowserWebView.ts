@@ -64,7 +64,7 @@ export class BrowserWebView {
     private getWebviewContent(production: boolean): string {
         const nonce = this.getNonce();
 
-        let contentSecurityPolicies = this.getContentSecurityPolicies(nonce);
+        const contentSecurityPolicies = this.getContentSecurityPolicies(nonce);
         let scripts = this.baseScripts;
 
         if (!production)

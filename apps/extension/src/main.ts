@@ -1,18 +1,13 @@
 import * as vscode from 'vscode';
 import { BrowserWebView } from './app/BrowserWebView';
-import { TerminalCommand } from '@npm-browser/shared';
+import { NPMTerminal } from './app/NPMTerminal';
 
 export function activate(context: vscode.ExtensionContext) {
 
-	const terminal = vscode.window.createTerminal('Install package');
-
-	function runTerminalCommand(command: TerminalCommand) {
-		terminal.show();
-		terminal.sendText(command.command, true);
-	}
+	const npmTerminal = new NPMTerminal();
 
 	const disposable = vscode.commands.registerCommand('npmBrowser.open', () => {
-		const browser = new BrowserWebView(context, runTerminalCommand, true);
+		const browser = new BrowserWebView(context, npmTerminal.runCommand, true);
 	});
 
 	context.subscriptions.push(disposable);
