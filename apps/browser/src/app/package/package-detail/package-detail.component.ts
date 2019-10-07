@@ -6,7 +6,7 @@ import { Store, select } from '@ngrx/store';
 import { getCurrentPackage } from '../../state/state.selectors';
 import { FormGroup, FormControl } from '@angular/forms';
 import { installPackage } from '../../state/state.actions';
-import { NpmInstallCommand } from '@npm-browser/shared';
+import { NpmInstallCommand } from 'libs/shared/src/index';
 
 @Component({
   selector: 'npmb-package-detail',

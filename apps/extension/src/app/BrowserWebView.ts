@@ -1,13 +1,11 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { TerminalCommand } from '@npm-browser/shared';
+import { TerminalCommand, Command } from '../../../../libs/shared/src/index';
 
 export class BrowserWebView {
 
-    private context: vscode.ExtensionContext;
-    private panel: vscode.WebviewPanel;
-
-    //onTerminalCommand: ((command: any) => void) | undefined;
+    private _context: vscode.ExtensionContext;
+    private _panel: vscode.WebviewPanel;
 
     private readonly commandListeners: { [key: string]: any } = {
         'npm-install': this.onTerminalCommand
@@ -26,10 +24,10 @@ export class BrowserWebView {
     ];
 
     constructor(context: vscode.ExtensionContext, private onTerminalCommand: ((command: TerminalCommand) => void), production = false) {
-        this.context = context;
+        this._context = context;
 
         // Create and show a new webview
-        this.panel = vscode.window.createWebviewPanel(
+        this._panel = vscode.window.createWebviewPanel(
             'npmBrowser',
             'NPM Browser',
             vscode.ViewColumn.Active,
@@ -39,10 +37,10 @@ export class BrowserWebView {
             }
         );
 
-        this.panel.webview.html = this.getWebviewContent(production);
+        this._panel.webview.html = this.getWebviewContent(production);
 
-        this.panel.webview.onDidReceiveMessage(
-            (command) => {
+        this._panel.webview.onDidReceiveMessage(
+            command => {
                 const commandListener = this.commandListeners[command.type];
 
                 if (commandListener)
@@ -53,8 +51,12 @@ export class BrowserWebView {
         );
     }
 
+    sendCommand(command: Command) {
+        this._panel.webview.postMessage(command);
+    }
+
     private getAssetUri(...paths: string[]): vscode.Uri {
-        return vscode.Uri.file(path.join(this.context.extensionPath, 'browser', ...paths));
+        return vscode.Uri.file(path.join(this._context.extensionPath, 'browser', ...paths));
     }
 
     private getAssetResourceUri(...paths: string[]): vscode.Uri {

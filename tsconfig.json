@@ -16,9 +16,9 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {
-      "@npm-browser/shared": ["libs/shared/src/index.ts"]
-    }
+    // "paths": {
+    //   "@npm-browser/shared": ["libs/shared/src/index.ts"]
+    // }
   },
   "exclude": ["node_modules", "tmp"]
 }
