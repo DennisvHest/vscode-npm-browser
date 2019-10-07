@@ -1,7 +1,6 @@
 import { createAction, props } from '@ngrx/store';
 import { PackageSearchResult } from '../model/package-search-result.model';
 import { Package } from '../model/package.model';
-//import { NpmInstallCommand } from '../../../../shared/commands/npm-install-command';
 
 // Search actions
 export const packageSearchResultChanged = createAction(
@@ -24,3 +23,7 @@ export const installPackage = createAction(
     '[Install] Install package triggered.',
     props<{value: any}>()
 );
+
+export const installPackageComplete = createAction(
+    '[Install] Install package completed.'
+)

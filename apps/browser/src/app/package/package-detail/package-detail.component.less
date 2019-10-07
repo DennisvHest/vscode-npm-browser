@@ -27,3 +27,20 @@ ngb-tabset {
 .nav-tabs {
     height: 42px;
 }
+
+.spinner-border {
+    position: absolute;
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.btn:not(.installing) .spinner-border {
+    display: none;
+}
+
+.btn.installing {
+    color: transparent;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

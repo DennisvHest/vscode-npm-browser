@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { BrowserWebView } from './app/BrowserWebView';
 import { NPMTerminal } from './app/NPMTerminal';
-import { CommandTypes } from 'libs/shared/src';
+import { CommandTypes } from '../../../libs/shared/src';
 
 export function activate(context: vscode.ExtensionContext) {
 
