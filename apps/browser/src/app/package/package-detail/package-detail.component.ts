@@ -7,7 +7,6 @@ import { getCurrentPackage, getInstallingPackage } from '../../state/state.selec
 import { FormGroup, FormControl } from '@angular/forms';
 import { installPackage } from '../../state/state.actions';
 import { NpmInstallCommand } from 'libs/shared/src/index';
-import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'npmb-package-detail',

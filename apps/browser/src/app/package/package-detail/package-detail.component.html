@@ -15,7 +15,7 @@
                         </option>
                     </select>
                     <div class="input-group-append">
-                        <button type="submit" class="btn btn-primary" [class.installing]="installingPackage$ | async" [class.disabled]="installingPackage$ | async">
+                        <button type="submit" class="btn btn-primary" [class.installing]="installingPackage$ | async" [disabled]="installingPackage$ | async">
                             <div class="spinner-border spinner-border-sm text-light" role="status">
                                 <span class="sr-only">Loading...</span>
                             </div>

@@ -1,5 +1,5 @@
 import { ActionReducerMap, createReducer, on } from '@ngrx/store';
-import { packageSearchResultChanged, selectedPackageChanged, currentPackageLoaded, installPackage } from './state.actions';
+import { packageSearchResultChanged, selectedPackageChanged, currentPackageLoaded, installPackage, installPackageComplete } from './state.actions';
 import { PackageSearchResult } from '../model/package-search-result.model';
 import { Package } from '../model/package.model';
 
@@ -52,7 +52,10 @@ export function currentPackageReducer(state, action) {
 }
 
 export function installingPackageReducer(state, action) {
-    return createReducer(null, on(installPackage, () => true))(state, action);
+    return createReducer(null, 
+        on(installPackage, () => true), 
+        on(installPackageComplete, () => false)
+    )(state, action);
 }
 
 export const reducers: ActionReducerMap<ApplicationState> = {

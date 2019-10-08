@@ -41,6 +41,7 @@ export class BrowserWebView {
 
         this._panel.webview.onDidReceiveMessage(
             command => {
+                // Process command from webview
                 const commandListener = this.commandListeners[command.type];
 
                 if (commandListener)
@@ -51,6 +52,10 @@ export class BrowserWebView {
         );
     }
 
+    /**
+     * Sends command to the web view.
+     * @param command The command to send.
+     */
     sendCommand(command: Command) {
         this._panel.webview.postMessage(command);
     }
@@ -63,6 +68,11 @@ export class BrowserWebView {
         return this.getAssetUri(...paths).with({ scheme: 'vscode-resource' });
     }
 
+    /**
+     * Gets the web view HTML containing the required Angular scripts.
+     * @param production A boolean indicating if the Angular app should
+     * be run in the production configuration.
+     */
     private getWebviewContent(production: boolean): string {
         const nonce = this.getNonce();
 
