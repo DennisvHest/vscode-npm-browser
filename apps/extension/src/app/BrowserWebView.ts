@@ -99,6 +99,7 @@ export class BrowserWebView {
                     <npmb-root></npmb-root>
                     <script nonce="${nonce}">
                         const vscode = acquireVsCodeApi();
+                        const workspaceState = ${JSON.stringify(this._context.workspaceState['_value'])}
                     </script>
                     ${scripts.join('')}
                 </body>

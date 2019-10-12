@@ -22,6 +22,9 @@
                             Install
                         </button>
                     </div>
+                    <div *ngIf="packageIsInstalled$ | async" class="input-group-append installed-message">
+                        <fa-icon [icon]="['fas', 'check-circle']"></fa-icon> Installed
+                    </div>
                 </div>
             </form>
         </div>

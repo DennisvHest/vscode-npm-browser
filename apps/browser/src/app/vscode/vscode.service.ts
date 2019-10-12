@@ -25,6 +25,10 @@ export class VSCodeService {
     return vscode.getState();
   }
 
+  getWorkspaceState(): VSCodeWorkspace {
+    return workspaceState;
+  }
+
   setState(state: ApplicationState) {
     vscode.setState(state);
   }

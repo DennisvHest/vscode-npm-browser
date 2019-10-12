@@ -1,12 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Subscription, combineLatest } from 'rxjs';
 import { Package } from '../../model/package.model';
 import { ApplicationState } from '../../state';
 import { Store, select } from '@ngrx/store';
-import { getCurrentPackage, getInstallingPackage } from '../../state/state.selectors';
+import { getCurrentPackage, getInstallingPackage, getInstalledPackages } from '../../state/state.selectors';
 import { FormGroup, FormControl } from '@angular/forms';
 import { installPackage } from '../../state/state.actions';
 import { NpmInstallCommand } from 'libs/shared/src/index';
+import { map } from 'rxjs/operators';
 
 @Component({
   selector: 'npmb-package-detail',
@@ -16,6 +17,7 @@ import { NpmInstallCommand } from 'libs/shared/src/index';
 export class PackageDetailComponent implements OnInit, OnDestroy {
   package$: Observable<Package>;
   installingPackage$: Observable<boolean>;
+  packageIsInstalled$: Observable<boolean>;
 
   packageInstallForm = new FormGroup({
     name: new FormControl(),
@@ -26,7 +28,12 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
 
   constructor(private store: Store<ApplicationState>) {
     this.package$ = this.store.pipe(select(getCurrentPackage));
-    this.installingPackage$ = this.store.pipe(select(getInstallingPackage))
+    this.installingPackage$ = this.store.pipe(select(getInstallingPackage));
+
+    this.packageIsInstalled$ = combineLatest(this.store.pipe(select(getInstalledPackages)), this.package$)
+      .pipe(
+        map(([installedPackages, currentPackage]) => currentPackage.name in installedPackages)
+      );
 
     this.packageSubscription = this.package$.subscribe(npmPackage => {
       if (!npmPackage)

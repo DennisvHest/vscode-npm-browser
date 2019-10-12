@@ -8,6 +8,7 @@ export interface ApplicationState {
     selectedPackageName: string | null;
     loadedPackage: Package;
     installingPackage: boolean;
+    vscodeWorkspace: VSCodeWorkspace;
 }
 
 const packageSearchResultInitialState = { objects: [], total: 0 };
@@ -16,11 +17,13 @@ export function initialState() {
     const initialStateFromVSCode: ApplicationState = vscode.getState();
 
     return initialStateFromVSCode
-        ? { ...initialStateFromVSCode, installingPackage: null }
+        ? { ...initialStateFromVSCode, vscodeWorkspace: workspaceState, installingPackage: null }
         : {
             packageSearchResult: packageSearchResultInitialState,
             selectedPackageId: null,
-            loadedPackage: null
+            loadedPackage: null,
+            installingPackage: null,
+            vscodeWorkspace: workspaceState
         };
 }
 
@@ -58,10 +61,15 @@ export function installingPackageReducer(state, action) {
     )(state, action);
 }
 
+export function vscodeWorkspaceReducer(state, action) {
+    return createReducer(null)(state, action);
+}
+
 export const reducers: ActionReducerMap<ApplicationState> = {
     packageSearchResult: packageSearchResultsReducer,
     selectedPackageName: selectedPackageIdReducer,
     loadedPackage: currentPackageReducer,
-    installingPackage: installingPackageReducer
+    installingPackage: installingPackageReducer,
+    vscodeWorkspace: vscodeWorkspaceReducer
 };
 

@@ -5,3 +5,9 @@ interface VSCode {
 }
 
 declare let vscode: VSCode;
+
+interface VSCodeWorkspace {
+    packageJson: any;
+}
+
+declare let workspaceState: VSCodeWorkspace;

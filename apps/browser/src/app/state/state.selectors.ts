@@ -14,3 +14,5 @@ export const getSelectedPackageResult = (state: ApplicationState) => {
 export const getCurrentPackage = (state: ApplicationState) => state.loadedPackage;
 
 export const getInstallingPackage = (state: ApplicationState) => state.installingPackage;
+
+export const getInstalledPackages = (state: ApplicationState) => state.vscodeWorkspace.packageJson.dependencies;

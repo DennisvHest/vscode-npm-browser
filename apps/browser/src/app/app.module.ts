@@ -17,7 +17,7 @@ import { EffectsModule } from '@ngrx/effects';
 import { ApplicationStateEffects } from './state/state.effects';
 import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
 import { FontAwesomeModule, FaIconLibrary } from '@fortawesome/angular-fontawesome';
-import { faCube, faInfoCircle } from '@fortawesome/free-solid-svg-icons';
+import { faCube, faInfoCircle, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import { VSCodeService } from './vscode/vscode.service';
 
 @NgModule({
@@ -50,6 +50,6 @@ import { VSCodeService } from './vscode/vscode.service';
 })
 export class AppModule {
   constructor(library: FaIconLibrary, private vsCodeService: VSCodeService) {
-    library.addIcons(faCube, faInfoCircle);
+    library.addIcons(faCube, faInfoCircle, faCheckCircle);
   }
 }
