@@ -8,9 +8,7 @@ export class NPMTerminal {
     private _terminal: vscode.Terminal | undefined | null;
     private _currentCommand: TerminalCommand | undefined | null;
 
-    private _packageJsonUri: vscode.Uri | undefined;
-    
-    packageJson: PackageJson;
+    packageJson: PackageJson | undefined;
 
     /**
      * Function to run after a command completed execution. The completed
@@ -20,22 +18,27 @@ export class NPMTerminal {
 
     constructor() { }
 
-    async findPackageJson() {
+    async findPackageJsons(): Promise<PackageJson[]> {
         let packageJsonFiles = await vscode.workspace.findFiles('**/package.json', '**/node_modules/**');
 
-        if (packageJsonFiles.length) {
-            this._packageJsonUri = packageJsonFiles[0];
+        if (!packageJsonFiles.length)
+            return [];
 
-            return new Promise<void>((resolve, reject) => {
-                readPackageJson(this._packageJsonUri!.fsPath, null, false, (error, data: PackageJson) => {
+        let readPackageJsonFiles = packageJsonFiles.map(packageJsonUri => {
+            return new Promise<PackageJson>((resolve, reject) => {
+                readPackageJson(packageJsonUri.fsPath, false, (error, data: PackageJson) => {
+                    // TODO: Test error handling
                     if (error)
                         reject(error);
 
-                    this.packageJson = data;
-                    resolve();
+                    data.filePath = packageJsonUri.fsPath;
+
+                    resolve(data);
                 });
             });
-        }
+        });
+
+        return Promise.all(readPackageJsonFiles);
     }
 
     /**
@@ -46,7 +49,7 @@ export class NPMTerminal {
             this._terminal = vscode.window.createTerminal({
                 name: 'Install package',
                 // TODO: Handle case where there is no package.json file in the workspace
-                cwd: this._packageJsonUri!.fsPath.replace(/package\.json$/, '')
+                cwd: this.packageJson!.filePath.replace(/package\.json$/, '')
             });
 
             vscode.window.onDidWriteTerminalData(this.onTerminalData);

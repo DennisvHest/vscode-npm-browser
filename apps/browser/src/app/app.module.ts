@@ -19,17 +19,21 @@ import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
 import { FontAwesomeModule, FaIconLibrary } from '@fortawesome/angular-fontawesome';
 import { faCube, faInfoCircle, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import { VSCodeService } from './vscode/vscode.service';
+import { AppRoutingModule } from './app-routing.module';
+import { PackageJsonSelectorComponent } from './settings/package-json-selector/package-json-selector.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     SearchComponent,
     PackageListComponent,
-    PackageDetailComponent
+    PackageDetailComponent,
+    PackageJsonSelectorComponent
   ],
   imports: [
     BrowserModule,
     HttpClientModule,
+    AppRoutingModule,
     StoreModule.forRoot(reducers, { initialState }),
     EffectsModule.forRoot([ApplicationStateEffects]),
     LoadingBarHttpClientModule,

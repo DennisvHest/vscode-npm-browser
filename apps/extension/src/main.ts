@@ -7,9 +7,9 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	const npmTerminal = new NPMTerminal();
 
-	await npmTerminal.findPackageJson();
+	const packageJsons = await npmTerminal.findPackageJsons();
 
-	context.workspaceState.update('packageJson', npmTerminal.packageJson);
+	context.workspaceState.update('packageJson', null/*npmTerminal.packageJson*/);
 
 	const disposable = vscode.commands.registerCommand('npmBrowser.open', () => {
 		const browser = new BrowserWebView(context, npmTerminal.runCommand, false);

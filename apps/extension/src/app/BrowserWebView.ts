@@ -89,7 +89,6 @@ export class BrowserWebView {
                 <head>
                     <meta charset="utf-8">
                     <title>NpmBrowser</title>
-                    <base href="${this.getAssetResourceUri()}/">
                     <meta http-equiv="Content-Security-Policy" content="${contentSecurityPolicies.join(';')}">
                     <meta name="viewport" content="width=device-width, initial-scale=1">
                     <link rel="icon" type="image/x-icon" href="favicon.ico">
