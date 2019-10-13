@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { TerminalCommand, CommandTypes } from '../../../../libs/shared/src/index'
+import { TerminalCommand, CommandTypes, PackageJson } from '../../../../libs/shared/src/index'
 
 const readPackageJson = require('read-package-json');
 
@@ -10,7 +10,7 @@ export class NPMTerminal {
 
     private _packageJsonUri: vscode.Uri | undefined;
     
-    packageJson: any;
+    packageJson: PackageJson;
 
     /**
      * Function to run after a command completed execution. The completed
@@ -27,7 +27,7 @@ export class NPMTerminal {
             this._packageJsonUri = packageJsonFiles[0];
 
             return new Promise<void>((resolve, reject) => {
-                readPackageJson(this._packageJsonUri!.fsPath, null, false, (error, data) => {
+                readPackageJson(this._packageJsonUri!.fsPath, null, false, (error, data: PackageJson) => {
                     if (error)
                         reject(error);
 

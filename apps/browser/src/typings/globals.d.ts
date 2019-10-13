@@ -7,7 +7,7 @@ interface VSCode {
 declare let vscode: VSCode;
 
 interface VSCodeWorkspace {
-    packageJson: any;
+    packageJson: import("../../../../libs/shared/src/index").PackageJson;
 }
 
 declare let workspaceState: VSCodeWorkspace;
