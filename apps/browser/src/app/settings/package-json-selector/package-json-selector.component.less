@@ -1,0 +1,33 @@
+@import "../../../mixins.less";
+
+.modal-body {
+    padding: 0;
+
+    > p {
+        padding: 20px 20px 0 20px;
+        margin: 0;
+    }
+
+    .list-group {
+        margin: 20px 0;
+
+        .list-group-item {
+            p {
+                .truncate-lines(3);
+            }
+
+            &.active {
+                border-color: var(--vscode-statusBar-background);
+                border-width: 0 0 0 3px;
+                border-style: solid;
+            }
+        }
+
+        .list-group-item-action:focus:not(.active),
+        .list-group-item-action:hover:not(.active) {
+            border-color: white;
+            border-width: 0 0 0 3px;
+            border-style: solid;
+        }
+    }
+}

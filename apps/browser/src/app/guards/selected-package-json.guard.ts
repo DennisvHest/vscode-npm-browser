@@ -19,7 +19,7 @@ export class SelectedPackageJsonGuard implements CanActivate {
     return this.store.pipe(
       select(getSelectedPackageJson),
       map(packageJson => {
-        return packageJson != null ? true : this.router.createUrlTree(['/package-json-select']);
+        return packageJson != null || this.router.createUrlTree(['/package-json-select']);
       })
     );
   }

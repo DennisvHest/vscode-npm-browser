@@ -1,10 +1,10 @@
 <div class="list-group">
     <div *ngFor="let package of packages" (click)="onPackageSelect(package)" class="list-group-item list-group-item-action" [class.active]="package.name === activePackageName">
         <div class="d-flex w-100 justify-content-between">
-            <h5 class="mb-1">{{package.name}}</h5>
-            <small class="text-muted">{{package.version}}</small>
+            <h5 class="mb-1">{{ package.name }}</h5>
+            <small class="text-muted">{{ package.version }}</small>
         </div>
-        <p class="mb-1">{{package.description}}</p>
-        <small *ngIf="package.author" class="text-muted">{{package.author.name}}</small>
+        <p class="mb-1">{{ package.description }}</p>
+        <small *ngIf="package.author" class="text-muted">{{ package.author.name }}</small>
     </div>
 </div>

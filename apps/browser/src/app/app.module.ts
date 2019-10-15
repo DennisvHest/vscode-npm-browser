@@ -3,7 +3,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 
-import { NgbModule, NgbTabsetModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModule, NgbTabsetModule, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
 import { MarkdownModule } from 'ngx-markdown';
 
 import { AppComponent } from './app.component';
@@ -39,6 +39,7 @@ import { PackageJsonSelectorComponent } from './settings/package-json-selector/p
     LoadingBarHttpClientModule,
     NgbModule,
     NgbTabsetModule,
+    NgbModalModule,
     MarkdownModule.forRoot(),
     ReactiveFormsModule,
     FontAwesomeModule
