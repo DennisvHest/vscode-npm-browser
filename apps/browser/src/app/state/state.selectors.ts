@@ -15,7 +15,14 @@ export const getCurrentPackage = (state: ApplicationState) => state.loadedPackag
 
 export const getInstallingPackage = (state: ApplicationState) => state.installingPackage;
 
-export const getInstalledPackages = (state: ApplicationState) => state.vscodeWorkspace.selectedPackageJson ? state.vscodeWorkspace.selectedPackageJson.dependencies : [];
+export const getInstalledPackages = (state: ApplicationState) => {
+    // TODOL Distinguish between dependencies, devdependencies.
+    if (!state.vscodeWorkspace.selectedPackageJson || !state.vscodeWorkspace.selectedPackageJson.dependencies) {
+        return {};
+    } else {
+        return state.vscodeWorkspace.selectedPackageJson.dependencies
+    }
+};
 
 export const getSelectedPackageJson = (state: ApplicationState) => state.vscodeWorkspace.selectedPackageJson;
 

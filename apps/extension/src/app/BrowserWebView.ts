@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { TerminalCommand, Command } from '../../../../libs/shared/src/index';
+import { TerminalCommand, Command, ValueCommand } from '../../../../libs/shared/src/index';
 
 export class BrowserWebView {
 
@@ -8,7 +8,8 @@ export class BrowserWebView {
     private _panel: vscode.WebviewPanel;
 
     private readonly commandListeners: { [key: string]: any } = {
-        'npm-install': this.onTerminalCommand
+        'npm-install': this.onTerminalCommand,
+        'package-json-selected': this.onValueCommand
     };
 
     private readonly baseScripts = [
@@ -23,7 +24,7 @@ export class BrowserWebView {
         'vendor.js'
     ];
 
-    constructor(context: vscode.ExtensionContext, private onTerminalCommand: ((command: TerminalCommand) => void), production = false) {
+    constructor(context: vscode.ExtensionContext, private onTerminalCommand: ((command: TerminalCommand) => void), private onValueCommand: ((command: ValueCommand) => void), production = false) {
         this._context = context;
 
         // Create and show a new webview
