@@ -1,12 +1,13 @@
 import { Component, OnInit, ViewChild, TemplateRef, AfterViewInit } from '@angular/core';
 import { Store, select } from '@ngrx/store';
 import { ApplicationState } from '../../state';
-import { Observable } from 'rxjs';
-import { PackageJson, CommandTypes, ValueCommand } from 'libs/shared/src';
-import { getPackageJsons } from '../../state/state.selectors';
+import { Observable, combineLatest } from 'rxjs';
+import { PackageJson, CommandTypes, ValueCommand, VSCodeToastCommand, ToastLevels } from 'libs/shared/src';
+import { getPackageJsons, getSelectedPackageJson } from '../../state/state.selectors';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { packageJsonSelected } from '../../state/state.actions';
-import { Router } from '@angular/router';
+import { take } from 'rxjs/operators';
+import { VSCodeService } from '../../vscode/vscode.service';
 
 @Component({
   selector: 'npmb-package-json-selector',
@@ -19,40 +20,69 @@ export class PackageJsonSelectorComponent implements OnInit, AfterViewInit {
 
   packageJsons$: Observable<PackageJson[]>;
 
-  selectedPackageJson: PackageJson;
+  chosenPackageJson: PackageJson;
 
   @ViewChild('packageJsonSelectModal', { static: false }) packageJsonSelectModal: TemplateRef<any>;
 
-  constructor(private store: Store<ApplicationState>, private router: Router, private modalService: NgbModal) { }
+  constructor(
+    private store: Store<ApplicationState>,
+    private modalService: NgbModal,
+    private vsCodeService: VSCodeService
+  ) { }
 
   ngOnInit() {
     this.packageJsons$ = this.store.pipe(select(getPackageJsons));
   }
 
   ngAfterViewInit() {
-    this.modal = this.modalService.open(this.packageJsonSelectModal, {
-      centered: true,
-      size: 'sm',
-      beforeDismiss: () => false
-    });
+    combineLatest(this.store.pipe(select(getSelectedPackageJson)), this.packageJsons$).pipe(take(1))
+      .subscribe(([selectedPackageJson, packageJsons]) => {
+
+        if (selectedPackageJson) {
+          // Selected package.json was saved in workspace 
+          this.selectPackageJson(selectedPackageJson);
+          return;
+        }
+
+        if (packageJsons.length === 1) {
+          // Only one package.json in the workspaces, so select that one.
+          this.selectPackageJson(packageJsons[0]);
+          this.save();
+
+          const toastMessage = new VSCodeToastCommand(`
+            Found package.json for '${this.chosenPackageJson.name}'. Packages will be installed to that package.json. 
+            Location: ${this.chosenPackageJson.filePath}
+          `);
+
+          this.vsCodeService.postCommand(toastMessage);
+          return;
+        }
+
+        // Multiple package.json files found. User has to select one.
+        this.modal = this.modalService.open(this.packageJsonSelectModal, {
+          centered: true,
+          size: 'sm',
+          beforeDismiss: () => false
+        });
+      });
   }
 
   selectPackageJson(packageJson: PackageJson) {
-    this.selectedPackageJson = packageJson;
+    this.chosenPackageJson = packageJson;
   }
 
   save() {
-    if (!this.selectedPackageJson)
+    if (!this.chosenPackageJson)
       return;
 
     const selectedPackageJsonCommand: ValueCommand = {
       type: CommandTypes.packageJsonSelected,
-      value: this.selectedPackageJson
+      value: this.chosenPackageJson
     };
 
     this.store.dispatch(packageJsonSelected({ value: selectedPackageJsonCommand }));
 
-    this.modal.close();
-    this.router.navigate(['/']);
+    if (this.modal)
+      this.modal.close();
   }
 }

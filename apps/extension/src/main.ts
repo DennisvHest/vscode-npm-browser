@@ -1,19 +1,23 @@
 import * as vscode from 'vscode';
 import { BrowserWebView } from './app/BrowserWebView';
 import { NPMTerminal } from './app/NPMTerminal';
-import { CommandTypes } from '../../../libs/shared/src';
+import { CommandTypes, ToastLevels, ValueCommand, VSCodeToastCommand } from '../../../libs/shared/src';
 
-export async function activate(context: vscode.ExtensionContext) {
+export function activate(context: vscode.ExtensionContext) {
 
 	const npmTerminal = new NPMTerminal();
 
-	context.workspaceState.update('packageJsons', await npmTerminal.findPackageJsons());
+	context.workspaceState.update('selectedPackageJson', null);
 
-	const disposable = vscode.commands.registerCommand('npmBrowser.open', () => {
-		const browser = new BrowserWebView(context, npmTerminal.runCommand, command => {
-			npmTerminal.packageJson = command.value;
-			context.workspaceState.update('selectedPackageJson', command.value);
-		}, false);
+	const disposable = vscode.commands.registerCommand('npmBrowser.open', async () => {
+
+		context.workspaceState.update('packageJsons', await npmTerminal.findPackageJsons());
+
+		const browser = new BrowserWebView(context, false);
+
+		browser.onTerminalCommand = npmTerminal.runCommand;
+		browser.onValueCommand = onValueCommand;
+		browser.onVSCodeToastCommand = onVSCodeToastCommand;
 
 		npmTerminal.onCommandComplete = command => {
 			if (command.type === CommandTypes.npmInstall)
@@ -22,6 +26,19 @@ export async function activate(context: vscode.ExtensionContext) {
 	});
 
 	context.subscriptions.push(disposable);
+
+	function onValueCommand(command: ValueCommand) {
+		npmTerminal.packageJson = command.value;
+		context.workspaceState.update('selectedPackageJson', command.value);
+	}
+
+	function onVSCodeToastCommand(command: VSCodeToastCommand) {
+		switch (command.level) {
+			case ToastLevels.info:
+			default: vscode.window.showInformationMessage(command.message); break;
+		}
+	}
 }
 
 export function deactivate() { }
+

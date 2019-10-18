@@ -7,4 +7,6 @@ export class CommandTypes {
     static readonly npmInstallComplete = 'npm-install-complete';
 
     static readonly packageJsonSelected = 'package-json-selected';
+
+    static readonly vsCodeToastCommand = 'vscode-toast-command';
 }

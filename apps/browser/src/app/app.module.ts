@@ -21,6 +21,7 @@ import { faCube, faInfoCircle, faCheckCircle } from '@fortawesome/free-solid-svg
 import { VSCodeService } from './vscode/vscode.service';
 import { AppRoutingModule } from './app-routing.module';
 import { PackageJsonSelectorComponent } from './settings/package-json-selector/package-json-selector.component';
+import { LayoutComponent } from './layout/layout.component';
 
 @NgModule({
   declarations: [
@@ -28,7 +29,8 @@ import { PackageJsonSelectorComponent } from './settings/package-json-selector/p
     SearchComponent,
     PackageListComponent,
     PackageDetailComponent,
-    PackageJsonSelectorComponent
+    PackageJsonSelectorComponent,
+    LayoutComponent
   ],
   imports: [
     BrowserModule,
