@@ -15,7 +15,7 @@ import { FormControl, FormGroup } from '@angular/forms';
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.less']
 })
-export class SearchComponent implements OnInit, AfterViewInit {
+export class SearchComponent implements OnInit {
 
   searchResult$: Observable<PackageSearchResult>;
   packages$: Observable<SearchPackage[]>;
@@ -39,10 +39,6 @@ export class SearchComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.store.dispatch(selectedPackageChanged({ value: 'react-bootstrap' }));
-  }
-
-  ngAfterViewInit() {
-    this.searchTextInput.nativeElement.focus();
   }
 
   search() {

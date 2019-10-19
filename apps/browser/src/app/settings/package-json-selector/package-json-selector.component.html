@@ -1,5 +1,5 @@
 <ng-template #packageJsonSelectModal let-modal *ngIf="packageJsons$ | async as packageJsons">
-    <ng-template *ngIf="packageJsons.length > 0">
+    <ng-container *ngIf="packageJsons.length > 0">
         <div class="modal-header">
             <h4 class="modal-title" id="modal-basic-title">Select a package.json</h4>
         </div>
@@ -23,7 +23,7 @@
         <div class="modal-footer">
             <button (click)="save()" type="button" class="btn btn-primary" [disabled]="!chosenPackageJson">Save</button>
         </div>
-    </ng-template>
+    </ng-container>
     <div class="modal-body" *ngIf="packageJsons.length === 0">
         <div class="row p-4">
             <div class="col-2 d-flex align-items-center">
