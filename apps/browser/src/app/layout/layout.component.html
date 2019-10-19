@@ -1,3 +1,6 @@
 <ngx-loading-bar color="#007acc" [includeSpinner]="false"></ngx-loading-bar>
+<npmb-package-json-selector #packageJsonSelector></npmb-package-json-selector>
+<button id="open-settings" class="btn btn-secondary position-fixed" (click)="packageJsonSelector.openModal()">
+    <fa-icon [icon]="['fas', 'cog']"></fa-icon>
+</button>
 <router-outlet></router-outlet>
-<npmb-package-json-selector></npmb-package-json-selector>

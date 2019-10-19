@@ -1,27 +1,40 @@
-<ng-template #packageJsonSelectModal let-modal>
-    <div class="modal-header">
-        <h4 class="modal-title" id="modal-basic-title">Select a package.json</h4>
-    </div>
-    <div class="modal-body">
-        <p>
-            Multiple package.json files where found in the workspace.
-            Please select the one you wish to install packages to.
-        </p>
-        <div class="list-group">
-            <div *ngFor="let packageJson of packageJsons$ | async" 
-                (click)="selectPackageJson(packageJson)" 
-                class="list-group-item list-group-item-action" 
-                [class.active]="packageJson === chosenPackageJson">
-                <div class="d-flex w-100 justify-content-between">
-                    <h4 class="mb-1">{{ packageJson.name }}</h4>
-                    <small class="text-muted">{{ packageJson.version }}</small>
+<ng-template #packageJsonSelectModal let-modal *ngIf="packageJsons$ | async as packageJsons">
+    <ng-template *ngIf="packageJsons.length > 0">
+        <div class="modal-header">
+            <h4 class="modal-title" id="modal-basic-title">Select a package.json</h4>
+        </div>
+        <div class="modal-body">
+            <p *ngIf="!(selectedPackageJson$ | async) && packageJsons.length > 1">
+                Multiple package.json files where found in the workspace.
+                Please select the one you wish to install packages to.
+            </p>
+            <div class="list-group">
+                <div *ngFor="let packageJson of packageJsons" (click)="selectPackageJson(packageJson)"
+                    class="list-group-item list-group-item-action" [class.active]="packageJson === chosenPackageJson">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h4 class="mb-1">{{ packageJson.name }}</h4>
+                        <small class="text-muted">{{ packageJson.version }}</small>
+                    </div>
+                    <p class="mb-1">{{ packageJson.description }}</p>
+                    <small class="text-muted">{{ packageJson.filePath }}</small>
                 </div>
-                <p class="mb-1">{{ packageJson.description }}</p>
-                <small class="text-muted">{{ packageJson.filePath }}</small>
             </div>
         </div>
-    </div>
-    <div class="modal-footer">
-        <button (click)="save()" type="button" class="btn btn-primary" [disabled]="!chosenPackageJson">Save</button>
+        <div class="modal-footer">
+            <button (click)="save()" type="button" class="btn btn-primary" [disabled]="!chosenPackageJson">Save</button>
+        </div>
+    </ng-template>
+    <div class="modal-body" *ngIf="packageJsons.length === 0">
+        <div class="row p-4">
+            <div class="col-2 d-flex align-items-center">
+                <fa-icon [icon]="['fas', 'info-circle']" size="2x"></fa-icon>
+            </div>
+            <div class="col-10">
+                <p class="m-0">
+                    No package.json file was found in the workspace. Make
+                    sure to initialize a package.json with 'npm init'.
+                </p>
+            </div>
+        </div>
     </div>
 </ng-template>

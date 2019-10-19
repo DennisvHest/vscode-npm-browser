@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, TemplateRef, AfterViewInit } from '@angul
 import { Store, select } from '@ngrx/store';
 import { ApplicationState } from '../../state';
 import { Observable, combineLatest } from 'rxjs';
-import { PackageJson, CommandTypes, ValueCommand, VSCodeToastCommand, ToastLevels } from 'libs/shared/src';
+import { PackageJson, CommandTypes, ValueCommand, VSCodeToastCommand } from 'libs/shared/src';
 import { getPackageJsons, getSelectedPackageJson } from '../../state/state.selectors';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { packageJsonSelected } from '../../state/state.actions';
@@ -18,9 +18,12 @@ export class PackageJsonSelectorComponent implements OnInit, AfterViewInit {
 
   modal: NgbModalRef;
 
+  canCloseModal: boolean = true;
+
   packageJsons$: Observable<PackageJson[]>;
 
   chosenPackageJson: PackageJson;
+  selectedPackageJson$: Observable<PackageJson>;
 
   @ViewChild('packageJsonSelectModal', { static: false }) packageJsonSelectModal: TemplateRef<any>;
 
@@ -32,10 +35,11 @@ export class PackageJsonSelectorComponent implements OnInit, AfterViewInit {
 
   ngOnInit() {
     this.packageJsons$ = this.store.pipe(select(getPackageJsons));
+    this.selectedPackageJson$ = this.store.pipe(select(getSelectedPackageJson));
   }
 
   ngAfterViewInit() {
-    combineLatest(this.store.pipe(select(getSelectedPackageJson)), this.packageJsons$).pipe(take(1))
+    combineLatest(this.selectedPackageJson$, this.packageJsons$).pipe(take(1))
       .subscribe(([selectedPackageJson, packageJsons]) => {
 
         if (selectedPackageJson) {
@@ -59,12 +63,33 @@ export class PackageJsonSelectorComponent implements OnInit, AfterViewInit {
         }
 
         // Multiple package.json files found. User has to select one.
-        this.modal = this.modalService.open(this.packageJsonSelectModal, {
-          centered: true,
-          size: 'sm',
-          beforeDismiss: () => false
-        });
+        this.openModal(false);
       });
+  }
+
+  openModal(canCloseModal: boolean = true) {
+    this.canCloseModal = canCloseModal;
+
+    this.modal = this.modalService.open(this.packageJsonSelectModal, {
+      centered: true,
+      size: 'sm',
+      beforeDismiss: () => {
+        if (this.canCloseModal) {
+          // Reset package.json selection to the currently selected package.json
+          this.selectedPackageJson$.pipe(take(1))
+            .subscribe(selectedPackageJson => this.chosenPackageJson = selectedPackageJson);
+        }
+
+        return this.canCloseModal;
+      },
+    });
+  }
+
+  closeModal() {
+    if (this.modal)
+      this.modal.close();
+
+    this.canCloseModal = true;
   }
 
   selectPackageJson(packageJson: PackageJson) {
@@ -82,7 +107,6 @@ export class PackageJsonSelectorComponent implements OnInit, AfterViewInit {
 
     this.store.dispatch(packageJsonSelected({ value: selectedPackageJsonCommand }));
 
-    if (this.modal)
-      this.modal.close();
+    this.closeModal();
   }
 }
