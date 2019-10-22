@@ -1,4 +1,4 @@
-import { Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { PackageService } from '../package.service';
 import { Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -28,7 +28,11 @@ export class SearchComponent implements OnInit {
     searchText: new FormControl('')
   });
 
-  constructor(private packageService: PackageService, private store: Store<ApplicationState>) {
+  page = 1;
+
+  previousSearchQuery: any;
+
+  constructor(private packageService: PackageService, private store: Store<ApplicationState>, private cd: ChangeDetectorRef) {
     this.searchResult$ = this.store.pipe(select(getPackageSearchResult));
     this.currentPackageName$ = this.store.pipe(select(getSelectedPackageName));
 
@@ -38,6 +42,9 @@ export class SearchComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.searchForm.setValue({ searchText: 'bootstrap' });
+    this.search();
+
     this.store.dispatch(selectedPackageChanged({ value: 'react-bootstrap' }));
   }
 
@@ -45,9 +52,20 @@ export class SearchComponent implements OnInit {
     if (!this.searchForm.valid)
       return;
 
-    this.packageService.search(this.searchForm.value.searchText).subscribe(result => {
+    const query = this.searchForm.value;
+
+    if (this.previousSearchQuery && this.previousSearchQuery.searchText !== query.searchText) {
+      this.page = 1;
+
+      // Manually triggering change detection because it is not done automatically when setting this.page for some reason.
+      this.cd.detectChanges()
+    }
+
+    this.packageService.search(query.searchText, this.page).subscribe(result => {
       this.store.dispatch(packageSearchResultChanged({ value: result }));
     });
+
+    this.previousSearchQuery = query;
   }
 
   onPackageSelected(searchPackage: SearchPackage) {

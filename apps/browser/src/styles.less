@@ -63,6 +63,21 @@ npmb-package-detail .tab-content {
     background-color: var(--vscode-statusBar-background);
 }
 
+.btn-transparent {
+    background-color: transparent;
+    border: none;
+    color: var(--vscode-editor-foreground);
+
+    &:hover {
+        color: white;
+    }
+
+    &:focus {
+        outline: none;
+        box-shadow: none;
+    }
+}
+
 .btn-primary:disabled {
     opacity: 1;
     background-color: rgba(78, 163, 255, 0.3);
@@ -105,6 +120,29 @@ hr {
 .modal-content {
     background-color: var(--vscode-sideBar-dropBackground);
     border-radius: 0;
+}
+
+ngb-pagination .pagination {
+    margin: 0;
+    display: flex;
+
+    .page-item, .page-item.disabled {
+        &.active {
+            .btn-primary();
+        }
+
+        a {
+            background-color: var(--vscode-editor-background);
+            border: 1px solid var(--vscode-panel-border);
+            color: var(--vscode-settings-textInputForeground);
+            padding: 12px;
+        }
+
+        &.disabled:not(:first-child):not(:last-child) {
+            flex: 1 1 auto;
+            text-align: center;
+        }
+    }
 }
 
 /* Markdown overrides */

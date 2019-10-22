@@ -1,15 +1,24 @@
 <div class="row">
-    <div class="col-3 search-panel">
+    <div class="col-6 col-md-3 d-flex flex-column search-panel">
         <form [formGroup]="searchForm" (ngSubmit)="search()">
             <input #searchTextInput id="search-text-input" type="text" formControlName="searchText" placeholder="Search NPM packages..." class="form-control">
         </form>
-        <npmb-package-list 
+        <npmb-package-list #searchResultList
             [packages]="packages$ | async" 
             [activePackageName]="currentPackageName$ | async" 
-            (packageSelected)="onPackageSelected($event)">
+            (packageSelected)="onPackageSelected($event)"
+            class="h-100">
         </npmb-package-list>
+        <ngb-pagination 
+            *ngIf="(searchResult$ | async).total > 0" 
+            [(page)]="page" 
+            [pageSize]="20" 
+            [maxSize]="5" 
+            [collectionSize]="(searchResult$ | async).total"
+            (pageChange)="search();">
+        </ngb-pagination>
     </div>
-    <div class="col-9 offset-3">
+    <div class="col-6 col-md-9 offset-6 offset-md-3">
         <npmb-package-detail></npmb-package-detail>
     </div>
 </div>

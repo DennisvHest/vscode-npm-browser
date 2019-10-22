@@ -14,10 +14,12 @@ export class PackageService {
 
   constructor(private http: HttpClient) { }
 
-  search(searchText: string): Observable<PackageSearchResult> {
+  search(searchText: string, page: number): Observable<PackageSearchResult> {
     return this.http.get<PackageSearchResult>(`${this.baseUrl}/-/v1/search`, {
       params: {
-        text: searchText
+        text: searchText,
+        size: (20).toString(),
+        from: ((page - 1) * 20).toString()
       }
     });
   }

@@ -3,7 +3,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 
-import { NgbModule, NgbTabsetModule, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModule, NgbTabsetModule, NgbModalModule, NgbPaginationModule } from '@ng-bootstrap/ng-bootstrap';
 import { MarkdownModule } from 'ngx-markdown';
 
 import { AppComponent } from './app.component';
@@ -42,6 +42,7 @@ import { LayoutComponent } from './layout/layout.component';
     NgbModule,
     NgbTabsetModule,
     NgbModalModule,
+    NgbPaginationModule,
     MarkdownModule.forRoot(),
     ReactiveFormsModule,
     FontAwesomeModule
@@ -56,7 +57,7 @@ import { LayoutComponent } from './layout/layout.component';
   bootstrap: [AppComponent]
 })
 export class AppModule {
-  constructor(library: FaIconLibrary, private vsCodeService: VSCodeService) {
+  constructor(library: FaIconLibrary, private vsCodeService: VSCodeService /** Injecting into AppModule to setup messageing with VSCode. */) {
     library.addIcons(faCube, faInfoCircle, faCheckCircle, faCog);
   }
 }
