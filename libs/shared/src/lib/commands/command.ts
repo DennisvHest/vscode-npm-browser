@@ -5,8 +5,9 @@ export interface Command {
 export class CommandTypes {
     static readonly npmInstall = 'npm-install';
     static readonly npmInstallComplete = 'npm-install-complete';
-
+    
     static readonly packageJsonSelected = 'package-json-selected';
+    static readonly packageJsonUpdated = 'package-json-updated';
 
     static readonly vsCodeToastCommand = 'vscode-toast-command';
 }

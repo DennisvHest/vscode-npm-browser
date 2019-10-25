@@ -23,6 +23,13 @@ export function activate(context: vscode.ExtensionContext) {
 			if (command.type === CommandTypes.npmInstall)
 				browser.sendCommand({ type: CommandTypes.npmInstallComplete });
 		}
+
+		npmTerminal.onPackageJsonChange = changedPackageJson => {
+			context.workspaceState.update('selectedPackageJson', changedPackageJson);
+			
+			const command: ValueCommand = { type: CommandTypes.packageJsonUpdated, value: changedPackageJson };
+			browser.sendCommand(command);
+		}
 	});
 
 	context.subscriptions.push(disposable);

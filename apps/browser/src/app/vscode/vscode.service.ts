@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { ApplicationState } from '../state';
-import { CommandTypes } from 'libs/shared/src';
+import { CommandTypes, ValueCommand } from 'libs/shared/src';
 import { Store } from '@ngrx/store';
-import { installPackageComplete } from '../state/state.actions';
+import { installPackageComplete, packageJsonUpdated } from '../state/state.actions';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +13,7 @@ export class VSCodeService {
     window.addEventListener('message', event => {
       switch (event.data.type) {
         case CommandTypes.npmInstallComplete: this.store.dispatch(installPackageComplete()); break;
+        case CommandTypes.packageJsonUpdated: this.store.dispatch(packageJsonUpdated({ value: (event.data as ValueCommand).value })); break;
       }
     });
   }

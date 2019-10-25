@@ -10,7 +10,7 @@
             </p>
             <div class="list-group">
                 <div *ngFor="let packageJson of packageJsons" (click)="selectPackageJson(packageJson)"
-                    class="list-group-item list-group-item-action" [class.active]="packageJson === chosenPackageJson">
+                    class="list-group-item list-group-item-action" [class.active]="packageJson.filePath === chosenPackageJson?.filePath">
                     <div class="d-flex w-100 justify-content-between">
                         <h4 class="mb-1">{{ packageJson.name }}</h4>
                         <small class="text-muted">{{ packageJson.version }}</small>

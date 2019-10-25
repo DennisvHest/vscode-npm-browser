@@ -9,6 +9,6 @@ export class NpmInstallCommand implements TerminalCommand {
         public packageName: string,
         public packageVersion: string
     ) {
-        this.command = `npm install ${this.packageName}@${this.packageVersion} --dry-run`;
+        this.command = `npm install ${this.packageName}@${this.packageVersion}`;
     }
 }

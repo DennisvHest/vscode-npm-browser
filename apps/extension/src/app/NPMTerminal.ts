@@ -7,8 +7,9 @@ export class NPMTerminal {
 
     private _terminal: vscode.Terminal | undefined | null;
     private _currentCommand: TerminalCommand | undefined | null;
+    private _packageJson: PackageJson | undefined;
 
-    packageJson: PackageJson | undefined;
+    private _packageJsonFileWatcher: vscode.FileSystemWatcher | undefined;
 
     /**
      * Function to run after a command completed execution. The completed
@@ -16,7 +17,29 @@ export class NPMTerminal {
      */
     onCommandComplete: ((command: TerminalCommand) => void) | undefined;
 
+    onPackageJsonChange: ((packageJson: PackageJson) => void) | undefined;
+
     constructor() { }
+
+    get packageJson() {
+        return this._packageJson;
+    }
+
+    set packageJson(packageJson) {
+        this._packageJson = packageJson;
+
+        if (this._packageJsonFileWatcher)
+            this._packageJsonFileWatcher.dispose();
+
+        this._packageJsonFileWatcher = vscode.workspace.createFileSystemWatcher(this._packageJson!.filePath, true, false, true);
+
+        this._packageJsonFileWatcher.onDidChange(async (packageJsonUri) => {
+            const changedPackageJson = await this.loadPackageJson(packageJsonUri.fsPath);
+
+            if (this.onPackageJsonChange)
+                this.onPackageJsonChange(changedPackageJson);
+        });
+    }
 
     async findPackageJsons(): Promise<PackageJson[]> {
         let packageJsonFiles = await vscode.workspace.findFiles('**/package.json', '**/node_modules/**');
@@ -24,21 +47,23 @@ export class NPMTerminal {
         if (!packageJsonFiles.length)
             return [];
 
-        let readPackageJsonFiles = packageJsonFiles.map(packageJsonUri => {
-            return new Promise<PackageJson>((resolve, reject) => {
-                readPackageJson(packageJsonUri.fsPath, false, (error, data: PackageJson) => {
-                    // TODO: Test error handling
-                    if (error)
-                        reject(error);
-
-                    data.filePath = packageJsonUri.fsPath;
-
-                    resolve(data);
-                });
-            });
-        });
+        let readPackageJsonFiles = packageJsonFiles.map(packageJsonUri => this.loadPackageJson(packageJsonUri.fsPath));
 
         return Promise.all(readPackageJsonFiles);
+    }
+
+    private loadPackageJson(filePath: string) {
+        return new Promise<PackageJson>((resolve, reject) => {
+            readPackageJson(filePath, false, (error, data: PackageJson) => {
+                // TODO: Test error handling
+                if (error)
+                    reject(error);
+
+                data.filePath = filePath;
+
+                resolve(data);
+            });
+        });
     }
 
     /**

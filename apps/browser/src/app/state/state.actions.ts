@@ -1,7 +1,7 @@
 import { createAction, props } from '@ngrx/store';
 import { PackageSearchResult } from '../model/package-search-result.model';
 import { Package } from '../model/package.model';
-import { Command, ValueCommand } from 'libs/shared/src';
+import { Command, ValueCommand, PackageJson } from 'libs/shared/src';
 
 // Search actions
 export const packageSearchResultChanged = createAction(
@@ -27,6 +27,11 @@ export const installPackage = createAction(
 
 export const installPackageComplete = createAction(
     '[Install] Install package completed.'
+)
+
+export const packageJsonUpdated = createAction(
+    '[Install] Package.json updated.',
+    props<{value: PackageJson}>()
 )
 
 // Settings actions
