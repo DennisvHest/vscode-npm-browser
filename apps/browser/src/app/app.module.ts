@@ -22,6 +22,9 @@ import { VSCodeService } from './vscode/vscode.service';
 import { AppRoutingModule } from './app-routing.module';
 import { PackageJsonSelectorComponent } from './settings/package-json-selector/package-json-selector.component';
 import { LayoutComponent } from './layout/layout.component';
+import { IsGreaterThanPipe } from './pipes/is-greater-than.pipe';
+import { EqualsPipe } from './pipes/equals.pipe';
+import { IsLessThanPipe } from './pipes/is-less-than.pipe';
 
 @NgModule({
   declarations: [
@@ -30,7 +33,10 @@ import { LayoutComponent } from './layout/layout.component';
     PackageListComponent,
     PackageDetailComponent,
     PackageJsonSelectorComponent,
-    LayoutComponent
+    LayoutComponent,
+    IsGreaterThanPipe,
+    EqualsPipe,
+    IsLessThanPipe
   ],
   imports: [
     BrowserModule,

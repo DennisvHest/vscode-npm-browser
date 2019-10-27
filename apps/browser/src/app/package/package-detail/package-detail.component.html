@@ -8,22 +8,29 @@
             <h6>{{ npmPackage.author.name }}</h6>
             <p>{{ npmPackage.description }}</p>
             <form [formGroup]="packageInstallForm" (ngSubmit)="installPackage()">
-                <div class="input-group">
+                <div class="d-flex">
                     <select formControlName="version" class="form-control">
                         <option *ngFor="let version of npmPackage.versions.reverse()" [ngValue]="version.version">
                             {{ version.version }}<ng-container *ngIf="version.distTags.length" > ({{ version.distTags.join(', ') }})</ng-container>
                         </option>
                     </select>
-                    <div class="input-group-append">
+                    <div *ngIf="selectedVersion$ | async as selectedVersion" class="input-group-append">
                         <button type="submit" class="btn btn-primary" [class.installing]="installingPackage$ | async" [disabled]="installingPackage$ | async">
                             <div class="spinner-border spinner-border-sm text-light" role="status">
                                 <span class="sr-only">Loading...</span>
                             </div>
-                            Install
+                            <ng-container *ngIf="installedVersion$ | async as installedVersion; else installText">
+                                <ng-container *ngIf="selectedVersion | equals:installedVersion; then installText"></ng-container>
+                                <ng-container *ngIf="selectedVersion | isGreaterThan:installedVersion">Upgrade</ng-container>
+                                <ng-container *ngIf="selectedVersion | isLessThan:installedVersion">Downgrade</ng-container>
+                            </ng-container>
+                            <ng-template #installText>Install</ng-template>
                         </button>
                     </div>
-                    <div *ngIf="packageIsInstalled$ | async" class="input-group-append installed-message">
-                        <fa-icon [icon]="['fas', 'check-circle']"></fa-icon> Installed
+                    <div *ngIf="installedVersion$ | async as installedVersion" class="input-group-append installed-message">
+                        <fa-icon [icon]="['fas', 'check-circle']"></fa-icon> 
+                        Installed 
+                        <b class="ml-1">({{ installedVersion.raw }})</b>
                     </div>
                 </div>
             </form>

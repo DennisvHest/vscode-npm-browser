@@ -8,6 +8,7 @@ import { FormGroup, FormControl } from '@angular/forms';
 import { installPackage } from '../../state/state.actions';
 import { NpmInstallCommand } from 'libs/shared/src/index';
 import { map } from 'rxjs/operators';
+import * as semver from 'semver';
 
 @Component({
   selector: 'npmb-package-detail',
@@ -17,7 +18,9 @@ import { map } from 'rxjs/operators';
 export class PackageDetailComponent implements OnInit, OnDestroy {
   package$: Observable<Package>;
   installingPackage$: Observable<boolean>;
-  packageIsInstalled$: Observable<boolean>;
+
+  selectedVersion$: Observable<semver.SemVer>;
+  installedVersion$: Observable<semver.Range>;
 
   packageInstallForm = new FormGroup({
     name: new FormControl(),
@@ -26,13 +29,21 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
 
   packageSubscription: Subscription;
 
-  constructor(private store: Store<ApplicationState>) {
+  constructor(private store: Store<ApplicationState>) { }
+
+  ngOnInit() {
     this.package$ = this.store.pipe(select(getCurrentPackage));
     this.installingPackage$ = this.store.pipe(select(getInstallingPackage));
 
-    this.packageIsInstalled$ = combineLatest(this.store.pipe(select(getInstalledPackages)), this.package$)
+    this.installedVersion$ = combineLatest(this.store.pipe(select(getInstalledPackages)), this.package$)
       .pipe(
-        map(([installedPackages, currentPackage]) => currentPackage.name in installedPackages)
+        map(([installedPackages, currentPackage]) => {
+          if (currentPackage.name in installedPackages) {
+            return new semver.Range(installedPackages[currentPackage.name], true);
+          } else {
+            return null;
+          }
+        })
       );
 
     this.packageSubscription = this.package$.subscribe(npmPackage => {
@@ -44,9 +55,14 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
         version: npmPackage.distTags.latest
       });
     });
-  }
 
-  ngOnInit() {
+    this.selectedVersion$ = this.packageInstallForm.get('version').valueChanges.pipe(map(version => {
+      if (!version) {
+        return null;
+      } else {
+        return semver.parse(version, true);
+      }
+    }));
   }
 
   installPackage() {
