@@ -3,7 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { withLatestFrom, map, mergeMap } from 'rxjs/operators';
 import { ApplicationState } from '.';
 import { Store } from '@ngrx/store';
-import { selectedPackageChanged, currentPackageLoaded, installPackage, packageJsonSelected } from './state.actions';
+import { selectedPackageChanged, currentPackageLoaded, installPackage, packageJsonSelected, uninstallPackage } from './state.actions';
 import { PackageService } from '../package/package.service';
 import { VSCodeService } from '../vscode/vscode.service';
 
@@ -26,7 +26,7 @@ export class ApplicationStateEffects {
     ));
 
     vsCodeMessages$ = createEffect(() => this.actions$.pipe(
-        ofType(installPackage, packageJsonSelected),
+        ofType(installPackage, uninstallPackage, packageJsonSelected),
         map(action => this.vsCodeService.postCommand(action.value))
     ), { dispatch: false });
 

@@ -3,10 +3,10 @@ import { Observable, Subscription, combineLatest } from 'rxjs';
 import { Package } from '../../model/package.model';
 import { ApplicationState } from '../../state';
 import { Store, select } from '@ngrx/store';
-import { getCurrentPackage, getInstallingPackage, getInstalledPackages } from '../../state/state.selectors';
+import { getCurrentPackage, getInstallingPackage, getInstalledPackages, getUninstallingPackage } from '../../state/state.selectors';
 import { FormGroup, FormControl } from '@angular/forms';
-import { installPackage } from '../../state/state.actions';
-import { NpmInstallCommand } from 'libs/shared/src/index';
+import { installPackage, uninstallPackage } from '../../state/state.actions';
+import { NpmInstallCommand, NpmUninstallCommand } from 'libs/shared/src/index';
 import { map } from 'rxjs/operators';
 import * as semver from 'semver';
 
@@ -17,7 +17,9 @@ import * as semver from 'semver';
 })
 export class PackageDetailComponent implements OnInit, OnDestroy {
   package$: Observable<Package>;
+  npmPackage: Package;
   installingPackage$: Observable<boolean>;
+  uninstallingPackage$: Observable<boolean>;
 
   selectedVersion$: Observable<semver.SemVer>;
   installedVersion$: Observable<semver.Range>;
@@ -34,6 +36,7 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.package$ = this.store.pipe(select(getCurrentPackage));
     this.installingPackage$ = this.store.pipe(select(getInstallingPackage));
+    this.uninstallingPackage$ = this.store.pipe(select(getUninstallingPackage));
 
     this.installedVersion$ = combineLatest(this.store.pipe(select(getInstalledPackages)), this.package$)
       .pipe(
@@ -49,6 +52,8 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
     this.packageSubscription = this.package$.subscribe(npmPackage => {
       if (!npmPackage)
         return;
+
+      this.npmPackage = npmPackage;
 
       this.packageInstallForm.setValue({
         name: npmPackage.name,
@@ -74,6 +79,12 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
     const installCommand = new NpmInstallCommand(value.name, value.version);
 
     this.store.dispatch(installPackage({ value: installCommand }));
+  }
+
+  uninstallPackage() {
+    const uninstallCommand = new NpmUninstallCommand(this.npmPackage.name);
+
+    this.store.dispatch(uninstallPackage({ value: uninstallCommand }));
   }
 
   ngOnDestroy() {

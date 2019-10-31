@@ -1,5 +1,5 @@
 import { ActionReducerMap, createReducer, on } from '@ngrx/store';
-import { packageSearchResultChanged, selectedPackageChanged, currentPackageLoaded, installPackage, installPackageComplete, packageJsonSelected, packageJsonUpdated } from './state.actions';
+import { packageSearchResultChanged, selectedPackageChanged, currentPackageLoaded, installPackage, installPackageComplete, packageJsonSelected, packageJsonUpdated, uninstallPackage, uninstallPackageComplete } from './state.actions';
 import { PackageSearchResult } from '../model/package-search-result.model';
 import { Package } from '../model/package.model';
 
@@ -8,6 +8,7 @@ export interface ApplicationState {
     selectedPackageName: string | null;
     loadedPackage: Package;
     installingPackage: boolean;
+    uninstallingPackage: boolean;
     vscodeWorkspace: VSCodeWorkspace;
 }
 
@@ -61,6 +62,13 @@ export function installingPackageReducer(state, action) {
     )(state, action);
 }
 
+export function uninstallingPackageReducer(state, action) {
+    return createReducer(null,
+        on(uninstallPackage, () => true),
+        on(uninstallPackageComplete, () => false)
+    )(state, action);
+}
+
 export function vscodeWorkspaceReducer(state, action) {
     const updatePackageJson = (currentState, { value }) => {
         return { ...currentState, selectedPackageJson: value }
@@ -77,6 +85,7 @@ export const reducers: ActionReducerMap<ApplicationState> = {
     selectedPackageName: selectedPackageIdReducer,
     loadedPackage: currentPackageReducer,
     installingPackage: installingPackageReducer,
+    uninstallingPackage: uninstallingPackageReducer,
     vscodeWorkspace: vscodeWorkspaceReducer
 };
 

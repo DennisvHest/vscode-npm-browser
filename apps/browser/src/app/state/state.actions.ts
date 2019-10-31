@@ -27,15 +27,24 @@ export const installPackage = createAction(
 
 export const installPackageComplete = createAction(
     '[Install] Install package completed.'
-)
+);
+
+export const uninstallPackage = createAction(
+    '[Install] Uninstall package triggered.',
+    props<{value: Command}>()
+);
+
+export const uninstallPackageComplete = createAction(
+    '[Install] Uninstall package completed.'
+);
 
 export const packageJsonUpdated = createAction(
     '[Install] Package.json updated.',
     props<{value: PackageJson}>()
-)
+);
 
 // Settings actions
 export const packageJsonSelected = createAction(
     "[Settings] Package.json selected.",
     props<{value: ValueCommand}>()
-)
+);

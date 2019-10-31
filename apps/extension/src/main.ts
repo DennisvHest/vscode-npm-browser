@@ -22,6 +22,9 @@ export function activate(context: vscode.ExtensionContext) {
 		npmTerminal.onCommandComplete = command => {
 			if (command.type === CommandTypes.npmInstall)
 				browser.sendCommand({ type: CommandTypes.npmInstallComplete });
+
+			if (command.type === CommandTypes.npmUninstall)
+				browser.sendCommand({ type: CommandTypes.npmUninstallComplete });
 		}
 
 		npmTerminal.onPackageJsonChange = changedPackageJson => {

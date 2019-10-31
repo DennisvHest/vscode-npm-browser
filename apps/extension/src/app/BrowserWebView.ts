@@ -13,6 +13,7 @@ export class BrowserWebView {
 
     private readonly commandListeners: { [key: string]: () => any } = {
         'npm-install': () => this.onTerminalCommand,
+        'npm-uninstall': () => this.onTerminalCommand,
         'package-json-selected': () => this.onValueCommand,
         'vscode-toast-command': () => this.onVSCodeToastCommand
     };

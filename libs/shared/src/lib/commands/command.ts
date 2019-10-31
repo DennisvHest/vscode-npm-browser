@@ -5,6 +5,8 @@ export interface Command {
 export class CommandTypes {
     static readonly npmInstall = 'npm-install';
     static readonly npmInstallComplete = 'npm-install-complete';
+    static readonly npmUninstallComplete = 'npm-uninstall-complete';
+    static readonly npmUninstall = 'npm-uninstall';
     
     static readonly packageJsonSelected = 'package-json-selected';
     static readonly packageJsonUpdated = 'package-json-updated';

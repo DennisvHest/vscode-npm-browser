@@ -17,7 +17,7 @@ import { EffectsModule } from '@ngrx/effects';
 import { ApplicationStateEffects } from './state/state.effects';
 import { LoadingBarHttpClientModule } from '@ngx-loading-bar/http-client';
 import { FontAwesomeModule, FaIconLibrary } from '@fortawesome/angular-fontawesome';
-import { faCube, faInfoCircle, faCheckCircle, faCog } from '@fortawesome/free-solid-svg-icons';
+import { faCube, faInfoCircle, faCheckCircle, faCog, faTrash } from '@fortawesome/free-solid-svg-icons';
 import { VSCodeService } from './vscode/vscode.service';
 import { AppRoutingModule } from './app-routing.module';
 import { PackageJsonSelectorComponent } from './settings/package-json-selector/package-json-selector.component';
@@ -64,6 +64,6 @@ import { IsLessThanPipe } from './pipes/is-less-than.pipe';
 })
 export class AppModule {
   constructor(library: FaIconLibrary, private vsCodeService: VSCodeService /** Injecting into AppModule to setup messageing with VSCode. */) {
-    library.addIcons(faCube, faInfoCircle, faCheckCircle, faCog);
+    library.addIcons(faCube, faInfoCircle, faCheckCircle, faCog, faTrash);
   }
 }

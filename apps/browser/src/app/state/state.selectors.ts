@@ -15,6 +15,8 @@ export const getCurrentPackage = (state: ApplicationState) => state.loadedPackag
 
 export const getInstallingPackage = (state: ApplicationState) => state.installingPackage;
 
+export const getUninstallingPackage = (state: ApplicationState) => state.uninstallingPackage;
+
 export const getInstalledPackages = (state: ApplicationState) => {
     // TODOL Distinguish between dependencies, devdependencies.
     if (!state.vscodeWorkspace.selectedPackageJson || !state.vscodeWorkspace.selectedPackageJson.dependencies) {

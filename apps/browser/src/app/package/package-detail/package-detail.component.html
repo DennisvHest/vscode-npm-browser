@@ -15,7 +15,8 @@
                         </option>
                     </select>
                     <div *ngIf="selectedVersion$ | async as selectedVersion" class="input-group-append">
-                        <button type="submit" class="btn btn-primary" [class.installing]="installingPackage$ | async" [disabled]="installingPackage$ | async">
+                        <button type="submit" class="btn btn-primary" [class.installing]="installingPackage$ | async"
+                            [disabled]="(uninstallingPackage$ | async) || (installingPackage$ | async)">
                             <div class="spinner-border spinner-border-sm text-light" role="status">
                                 <span class="sr-only">Loading...</span>
                             </div>
@@ -27,7 +28,14 @@
                             <ng-template #installText>Install</ng-template>
                         </button>
                     </div>
-                    <div *ngIf="installedVersion$ | async as installedVersion" class="input-group-append installed-message">
+                    <div *ngIf="installedVersion$ | async as installedVersion" class="installed-message">
+                        <button type="button" class="btn btn-transparent" (click)="uninstallPackage()"
+                            [class.installing]="uninstallingPackage$ | async" [disabled]="(uninstallingPackage$ | async) || (installingPackage$ | async)">
+                            <div class="spinner-border spinner-border-sm text-light" role="status">
+                                <span class="sr-only">Loading...</span>
+                            </div>
+                            <fa-icon [icon]="['fas', 'trash']" size="lg"></fa-icon>
+                        </button>
                         <fa-icon [icon]="['fas', 'check-circle']"></fa-icon> 
                         Installed 
                         <b class="ml-1">({{ installedVersion.raw }})</b>

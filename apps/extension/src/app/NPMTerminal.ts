@@ -101,6 +101,15 @@ export class NPMTerminal {
                 this.onCommandComplete(this._currentCommand);
 
             this._currentCommand = null;
+            return;
+        }
+
+        if (/\nremoved \d* package/.test(event.data) && this._currentCommand && this._currentCommand.type === CommandTypes.npmUninstall) {
+            if (this.onCommandComplete)
+                this.onCommandComplete(this._currentCommand);
+
+            this._currentCommand = null;
+            return;
         }
     }
 
