@@ -41,6 +41,37 @@
                         <b class="ml-1">({{ installedVersion.raw }})</b>
                     </div>
                 </div>
+                <ng-template #installOptionsModal let-modal>
+                    <div class="modal-body">
+                        <h5>Version range</h5>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" formControlName="updateLevel" id="updateLevel0" [value]="0">
+                            <label class="form-check-label" for="updateLevel0">
+                                Exact
+                            </label>
+                            <span> (--save-exact)</span>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" formControlName="updateLevel" id="updateLevel3" [value]="3">
+                            <label class="form-check-label" for="updateLevel3">
+                                Only patch updates
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" formControlName="updateLevel" id="updateLevel2" [value]="2">
+                            <label class="form-check-label" for="updateLevel2">
+                                Only minor and patch updates
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" formControlName="updateLevel" id="updateLevel1" [value]="1">
+                            <label class="form-check-label" for="updateLevel1">
+                                Major, minor and patch updates
+                            </label>
+                        </div>
+                    </div>
+                </ng-template>
+                <button type="button" class="btn btn-link" (click)="openInstallationOptionsModal(installOptionsModal)">More installation options</button>
             </form>
         </div>
     </div>

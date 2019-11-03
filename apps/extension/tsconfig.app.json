@@ -9,7 +9,6 @@
       "es6"
     ],
     "sourceMap": true,
-    "strict": true
   },
   "exclude": [
     "**/*.spec.ts"

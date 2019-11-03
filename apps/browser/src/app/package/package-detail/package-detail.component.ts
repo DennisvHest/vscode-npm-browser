@@ -9,6 +9,7 @@ import { installPackage, uninstallPackage } from '../../state/state.actions';
 import { NpmInstallCommand, NpmUninstallCommand } from 'libs/shared/src/index';
 import { map } from 'rxjs/operators';
 import * as semver from 'semver';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'npmb-package-detail',
@@ -26,12 +27,13 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
 
   packageInstallForm = new FormGroup({
     name: new FormControl(),
-    version: new FormControl()
+    version: new FormControl(),
+    updateLevel: new FormControl(3)
   });
 
   packageSubscription: Subscription;
 
-  constructor(private store: Store<ApplicationState>) { }
+  constructor(private store: Store<ApplicationState>, private modalService: NgbModal) { }
 
   ngOnInit() {
     this.package$ = this.store.pipe(select(getCurrentPackage));
@@ -55,9 +57,10 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
 
       this.npmPackage = npmPackage;
 
-      this.packageInstallForm.setValue({
+      this.packageInstallForm.patchValue({
         name: npmPackage.name,
-        version: npmPackage.distTags.latest
+        version: npmPackage.distTags.latest,
+        updateLevel: 3
       });
     });
 
@@ -70,13 +73,21 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
     }));
   }
 
+  openInstallationOptionsModal(content) {
+    this.modalService.open(content, { size: 'sm', centered: true });
+  }
+
   installPackage() {
     if (!this.packageInstallForm.valid)
       return;
 
     const value = this.packageInstallForm.value;
 
-    const installCommand = new NpmInstallCommand(value.name, value.version);
+    const installCommand = new NpmInstallCommand({
+      packageName: value.name,
+      packageVersion: value.version,
+      updateLevel: value.updateLevel
+    });
 
     this.store.dispatch(installPackage({ value: installCommand }));
   }

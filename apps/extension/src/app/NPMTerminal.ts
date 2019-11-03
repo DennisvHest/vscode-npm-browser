@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
-import { TerminalCommand, CommandTypes, PackageJson } from '../../../../libs/shared/src/index'
+import { TerminalCommand, CommandTypes, PackageJson, NpmInstallCommand } from '../../../../libs/shared/src/index'
 
+import * as fs from "fs";
 const readPackageJson = require('read-package-json');
 
 export class NPMTerminal {
@@ -15,9 +16,13 @@ export class NPMTerminal {
      * Function to run after a command completed execution. The completed
      * command is passed into the given function.
      */
-    onCommandComplete: ((command: TerminalCommand) => void) | undefined;
+    onCommandComplete: ((command?: TerminalCommand) => void) | undefined;
 
     onPackageJsonChange: ((packageJson: PackageJson) => void) | undefined;
+
+    private readonly postCommandListeners: { [key: string]: () => () => void} = {
+        'npm-install': () => this.afterNPMInstall
+    };
 
     constructor() { }
 
@@ -97,20 +102,34 @@ export class NPMTerminal {
 
     private onTerminalData = (event: vscode.TerminalDataWriteEvent) => {
         if (/\nadded \d* package/.test(event.data) && this._currentCommand && this._currentCommand.type === CommandTypes.npmInstall) {
-            if (this.onCommandComplete)
-                this.onCommandComplete(this._currentCommand);
-
-            this._currentCommand = null;
+            this.completeCommand();
             return;
         }
 
         if (/\nremoved \d* package/.test(event.data) && this._currentCommand && this._currentCommand.type === CommandTypes.npmUninstall) {
-            if (this.onCommandComplete)
-                this.onCommandComplete(this._currentCommand);
-
-            this._currentCommand = null;
+            this.completeCommand();
             return;
         }
+    }
+
+    private completeCommand = async () => {
+        if (this.postCommandListeners[this._currentCommand!.type])
+            this.postCommandListeners[this._currentCommand!.type]()();
+
+        if (this.onCommandComplete)
+            this.onCommandComplete(this._currentCommand);
+
+        this._currentCommand = null;
+    }
+
+    private afterNPMInstall = () => {
+        const installCommand = this._currentCommand as NpmInstallCommand;
+
+        const packageJson: PackageJson = JSON.parse(fs.readFileSync(this.packageJson!.filePath, 'utf8'));
+
+        packageJson.dependencies[installCommand.packageName] = installCommand.versionRange;
+
+        fs.writeFileSync(this.packageJson!.filePath, JSON.stringify(packageJson, null, 2))
     }
 
     /**
