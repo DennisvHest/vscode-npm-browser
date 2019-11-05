@@ -5,5 +5,6 @@ export * from './lib/commands/npm-uninstall-command';
 export * from './lib/commands/value-command';
 export * from './lib/commands/vscode-toast-command';
 export * from './lib/package-json';
+export * from './lib/installed-package';
 export * from './lib/npm-install-options';
 export * from './lib/semver/semver-extensions';

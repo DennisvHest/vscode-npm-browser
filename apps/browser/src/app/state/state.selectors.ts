@@ -1,4 +1,5 @@
 import { ApplicationState } from '.';
+import { InstalledPackage, PackageType } from 'libs/shared/src';
 
 export const getPackageSearchResult = (state: ApplicationState) => state.packageSearchResult;
 
@@ -17,13 +18,39 @@ export const getInstallingPackage = (state: ApplicationState) => state.installin
 
 export const getUninstallingPackage = (state: ApplicationState) => state.uninstallingPackage;
 
-export const getInstalledPackages = (state: ApplicationState) => {
-    // TODOL Distinguish between dependencies, devdependencies.
-    if (!state.vscodeWorkspace.selectedPackageJson || !state.vscodeWorkspace.selectedPackageJson.dependencies) {
-        return {};
-    } else {
-        return state.vscodeWorkspace.selectedPackageJson.dependencies
+export const getInstalledPackages = (state: ApplicationState): InstalledPackage[] => {
+    if (!state.vscodeWorkspace.selectedPackageJson)
+        return [];
+
+    const dependencies = state.vscodeWorkspace.selectedPackageJson.dependencies;
+    const devDependencies = state.vscodeWorkspace.selectedPackageJson.devDependencies;
+    const optionalDependencies = state.vscodeWorkspace.selectedPackageJson.optionalDependencies;
+
+    let installedDependencies = [];
+    
+    if (dependencies) {
+        installedDependencies = Object.keys(dependencies).map(npmPackage => {
+            return new InstalledPackage(npmPackage, dependencies[npmPackage], PackageType.Dependency)
+        });
     }
+
+    let installedDevDependencies = [];
+    
+    if (devDependencies) {
+        installedDevDependencies = Object.keys(devDependencies).map(npmPackage => {
+            return new InstalledPackage(npmPackage, devDependencies[npmPackage], PackageType.DevDependency)
+        });
+    }
+
+    let installedOptionalDependencies = [];
+
+    if (optionalDependencies) {
+        installedOptionalDependencies = Object.keys(optionalDependencies).map(npmPackage => {
+            return new InstalledPackage(npmPackage, optionalDependencies[npmPackage], PackageType.OptionalDependency)
+        });
+    }
+
+    return [...installedDependencies, ...installedDevDependencies, ...installedOptionalDependencies];
 };
 
 export const getSelectedPackageJson = (state: ApplicationState) => state.vscodeWorkspace.selectedPackageJson;

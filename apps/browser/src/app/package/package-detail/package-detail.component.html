@@ -21,9 +21,9 @@
                                 <span class="sr-only">Loading...</span>
                             </div>
                             <ng-container *ngIf="installedVersion$ | async as installedVersion; else installText">
-                                <ng-container *ngIf="selectedVersion | equals:installedVersion; then installText"></ng-container>
-                                <ng-container *ngIf="selectedVersion | isGreaterThan:installedVersion">Upgrade</ng-container>
-                                <ng-container *ngIf="selectedVersion | isLessThan:installedVersion">Downgrade</ng-container>
+                                <ng-container *ngIf="selectedVersion | equals:installedVersion.version; then installText"></ng-container>
+                                <ng-container *ngIf="selectedVersion | isGreaterThan:installedVersion.version">Upgrade</ng-container>
+                                <ng-container *ngIf="selectedVersion | isLessThan:installedVersion.version">Downgrade</ng-container>
                             </ng-container>
                             <ng-template #installText>Install</ng-template>
                         </button>
@@ -38,7 +38,9 @@
                         </button>
                         <fa-icon [icon]="['fas', 'check-circle']"></fa-icon> 
                         Installed 
-                        <b class="ml-1">({{ installedVersion.raw }})</b>
+                        <ng-container *ngIf="installedVersion.type === PackageType.DevDependency">as development dependency </ng-container>
+                        <ng-container *ngIf="installedVersion.type === PackageType.OptionalDependency">as optional dependency </ng-container>
+                        <b class="ml-1">({{ installedVersion.version.raw }})</b>
                     </div>
                 </div>
                 <ng-template #installOptionsModal let-modal>
@@ -71,7 +73,9 @@
                         </div>
                     </div>
                 </ng-template>
-                <button type="button" class="btn btn-link" (click)="openInstallationOptionsModal(installOptionsModal)">More installation options</button>
+                <button type="button" class="btn btn-link" (click)="openInstallationOptionsModal(installOptionsModal)">
+                    <fa-icon [icon]="['fas', 'cog']" class="mr-1"></fa-icon>More installation options
+                </button>
             </form>
         </div>
     </div>
@@ -79,7 +83,7 @@
         <ngb-tab title="Readme">
             <ng-template ngbTabContent>
                 <div class="row">
-                    <div class="col">
+                    <div class="col px-5">
                         <markdown *ngIf="npmPackage.readme" ngPreserveWhitespaces [data]="npmPackage.readme"></markdown>
                         <div *ngIf="!npmPackage.readme" class="alert alert-info">
                             <fa-icon [icon]="['fas', 'info-circle']"></fa-icon> This package does not have a readme.

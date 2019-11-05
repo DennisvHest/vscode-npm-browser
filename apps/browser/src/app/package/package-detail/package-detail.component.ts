@@ -6,7 +6,7 @@ import { Store, select } from '@ngrx/store';
 import { getCurrentPackage, getInstallingPackage, getInstalledPackages, getUninstallingPackage } from '../../state/state.selectors';
 import { FormGroup, FormControl } from '@angular/forms';
 import { installPackage, uninstallPackage } from '../../state/state.actions';
-import { NpmInstallCommand, NpmUninstallCommand } from 'libs/shared/src/index';
+import { NpmInstallCommand, NpmUninstallCommand, InstalledPackage, PackageType } from 'libs/shared/src/index';
 import { map } from 'rxjs/operators';
 import * as semver from 'semver';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -23,7 +23,7 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
   uninstallingPackage$: Observable<boolean>;
 
   selectedVersion$: Observable<semver.SemVer>;
-  installedVersion$: Observable<semver.Range>;
+  installedVersion$: Observable<InstalledPackage>;
 
   packageInstallForm = new FormGroup({
     name: new FormControl(),
@@ -32,6 +32,8 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
   });
 
   packageSubscription: Subscription;
+
+  PackageType = PackageType;
 
   constructor(private store: Store<ApplicationState>, private modalService: NgbModal) { }
 
@@ -43,8 +45,10 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
     this.installedVersion$ = combineLatest(this.store.pipe(select(getInstalledPackages)), this.package$)
       .pipe(
         map(([installedPackages, currentPackage]) => {
-          if (currentPackage.name in installedPackages) {
-            return new semver.Range(installedPackages[currentPackage.name], true);
+          const installedPackage = installedPackages.find(installedPackage => installedPackage.name === currentPackage.name);
+
+          if (installedPackage) {
+            return installedPackage;
           } else {
             return null;
           }
