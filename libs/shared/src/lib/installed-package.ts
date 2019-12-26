@@ -1,10 +1,5 @@
 import * as semver from 'semver';
-
-export enum PackageType {
-    Dependency,
-    DevDependency,
-    OptionalDependency
-}
+import { PackageType } from './package-type';
 
 export class InstalledPackage {
 

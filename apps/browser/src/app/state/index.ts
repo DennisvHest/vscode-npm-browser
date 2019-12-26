@@ -1,9 +1,10 @@
 import { ActionReducerMap, createReducer, on } from '@ngrx/store';
-import { packageSearchResultChanged, selectedPackageChanged, currentPackageLoaded, installPackage, installPackageComplete, packageJsonSelected, packageJsonUpdated, uninstallPackage, uninstallPackageComplete } from './state.actions';
+import { packageSearchResultChanged, selectedPackageChanged, currentPackageLoaded, installPackage, installPackageComplete, packageJsonSelected, packageJsonUpdated, uninstallPackage, uninstallPackageComplete, packageSearchQueryChanged } from './state.actions';
 import { PackageSearchResult } from '../model/package-search-result.model';
 import { Package } from '../model/package.model';
 
 export interface ApplicationState {
+    packageSearchQuery: PackageSearchQuery;
     packageSearchResult: PackageSearchResult;
     selectedPackageName: string | null;
     loadedPackage: Package;
@@ -12,7 +13,8 @@ export interface ApplicationState {
     vscodeWorkspace: VSCodeWorkspace;
 }
 
-const packageSearchResultInitialState = { objects: [], total: 0 };
+const packageSearchQueryInitialState = { searchText: '', page: 1 } as PackageSearchQuery;
+const packageSearchResultInitialState = { objects: [], total: 0 } as PackageSearchResult;
 
 export function initialState() {
     const initialStateFromVSCode: ApplicationState = vscode.getState();
@@ -20,12 +22,21 @@ export function initialState() {
     return initialStateFromVSCode
         ? { ...initialStateFromVSCode, vscodeWorkspace: workspaceState, installingPackage: null }
         : {
+            packageSearchQuery: packageSearchQueryInitialState,
             packageSearchResult: packageSearchResultInitialState,
             selectedPackageId: null,
             loadedPackage: null,
             installingPackage: null,
             vscodeWorkspace: workspaceState
         };
+}
+
+export function packageSearchQueryReducer(state, action) {
+    return createReducer(packageSearchQueryInitialState,
+        on(packageSearchQueryChanged, (currentState, { value }) => {
+            return { ...currentState, ...value };
+        })
+    )(state, action);
 }
 
 export function packageSearchResultsReducer(state, action) {
@@ -81,6 +92,7 @@ export function vscodeWorkspaceReducer(state, action) {
 }
 
 export const reducers: ActionReducerMap<ApplicationState> = {
+    packageSearchQuery: packageSearchQueryReducer,
     packageSearchResult: packageSearchResultsReducer,
     selectedPackageName: selectedPackageIdReducer,
     loadedPackage: currentPackageReducer,

@@ -1,13 +1,13 @@
 import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { PackageService } from '../package.service';
 import { Observable } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { map, tap, take } from 'rxjs/operators';
 import { PackageSearchResult } from '../../model/package-search-result.model';
 import { SearchPackage } from '../../model/search-package.model';
 import { Store, select } from '@ngrx/store';
 import { ApplicationState } from '../../state';
 import { packageSearchResultChanged, selectedPackageChanged } from '../../state/state.actions';
-import { getPackageSearchResult, getSelectedPackageName } from '../../state/state.selectors';
+import { getPackageSearchResult, getSelectedPackageName, getPackageSearchQuery } from '../../state/state.selectors';
 import { FormControl, FormGroup } from '@angular/forms';
 
 @Component({
@@ -21,8 +21,6 @@ export class SearchComponent implements OnInit {
   packages$: Observable<SearchPackage[]>;
 
   currentPackageName$: Observable<string>;
-
-  @ViewChild('searchTextInput', { static: false }) searchTextInput: ElementRef;
 
   searchForm = new FormGroup({
     searchText: new FormControl('')
@@ -42,10 +40,13 @@ export class SearchComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.searchForm.setValue({ searchText: 'bootstrap' });
-    this.search();
-
-    this.store.dispatch(selectedPackageChanged({ value: 'react-bootstrap' }));
+    this.store.select(getPackageSearchQuery).pipe(take(1)).subscribe(query => {
+      this.searchForm.patchValue(query);
+      this.page = query.page;
+      this.search();
+  
+      this.store.dispatch(selectedPackageChanged({ value: 'react-bootstrap' }));
+    })
   }
 
   search() {
@@ -61,9 +62,7 @@ export class SearchComponent implements OnInit {
       this.cd.detectChanges()
     }
 
-    this.packageService.search(query.searchText, this.page).subscribe(result => {
-      this.store.dispatch(packageSearchResultChanged({ value: result }));
-    });
+    this.packageService.search({ searchText: query.searchText, page: this.page }).subscribe();
 
     this.previousSearchQuery = query;
   }

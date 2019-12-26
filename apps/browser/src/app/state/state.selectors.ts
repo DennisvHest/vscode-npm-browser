@@ -1,6 +1,8 @@
 import { ApplicationState } from '.';
 import { InstalledPackage, PackageType } from 'libs/shared/src';
 
+export const getPackageSearchQuery = (state: ApplicationState) => state.packageSearchQuery;
+
 export const getPackageSearchResult = (state: ApplicationState) => state.packageSearchResult;
 
 export const getSelectedPackageName = (state: ApplicationState) => state.selectedPackageName;
@@ -26,23 +28,23 @@ export const getInstalledPackages = (state: ApplicationState): InstalledPackage[
     const devDependencies = state.vscodeWorkspace.selectedPackageJson.devDependencies;
     const optionalDependencies = state.vscodeWorkspace.selectedPackageJson.optionalDependencies;
 
-    let installedDependencies = [];
-    
+    let installedDependencies: InstalledPackage[] = [];
+
     if (dependencies) {
         installedDependencies = Object.keys(dependencies).map(npmPackage => {
             return new InstalledPackage(npmPackage, dependencies[npmPackage], PackageType.Dependency)
         });
     }
 
-    let installedDevDependencies = [];
-    
+    let installedDevDependencies: InstalledPackage[] = [];
+
     if (devDependencies) {
         installedDevDependencies = Object.keys(devDependencies).map(npmPackage => {
             return new InstalledPackage(npmPackage, devDependencies[npmPackage], PackageType.DevDependency)
         });
     }
 
-    let installedOptionalDependencies = [];
+    let installedOptionalDependencies: InstalledPackage[] = [];
 
     if (optionalDependencies) {
         installedOptionalDependencies = Object.keys(optionalDependencies).map(npmPackage => {
@@ -50,7 +52,15 @@ export const getInstalledPackages = (state: ApplicationState): InstalledPackage[
         });
     }
 
-    return [...installedDependencies, ...installedDevDependencies, ...installedOptionalDependencies];
+    // Order is importent here because of removing duplicates below.
+    let allInstalledDependencies = [...installedOptionalDependencies, ...installedDevDependencies, ...installedDependencies];
+
+    // Remove duplicate installed packages (selectedPackageJson.dependencies contains ALL dependencies including dev, optional, etc.).
+    allInstalledDependencies = allInstalledDependencies.filter((dependency, index, self) => {
+        return index === self.findIndex(d => d.name === dependency.name);
+    });
+
+    return allInstalledDependencies;
 };
 
 export const getSelectedPackageJson = (state: ApplicationState) => state.vscodeWorkspace.selectedPackageJson;

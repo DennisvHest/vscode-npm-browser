@@ -23,12 +23,15 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
   uninstallingPackage$: Observable<boolean>;
 
   selectedVersion$: Observable<semver.SemVer>;
+
   installedVersion$: Observable<InstalledPackage>;
+  installedVersion: InstalledPackage;
 
   packageInstallForm = new FormGroup({
     name: new FormControl(),
     version: new FormControl(),
-    updateLevel: new FormControl(3)
+    updateLevel: new FormControl(3),
+    packageType: new FormControl(PackageType.Dependency)
   });
 
   packageSubscription: Subscription;
@@ -45,7 +48,12 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
     this.installedVersion$ = combineLatest(this.store.pipe(select(getInstalledPackages)), this.package$)
       .pipe(
         map(([installedPackages, currentPackage]) => {
+          if (!currentPackage)
+            return null;
+
           const installedPackage = installedPackages.find(installedPackage => installedPackage.name === currentPackage.name);
+
+          this.installedVersion = installedPackage;
 
           if (installedPackage) {
             return installedPackage;
@@ -55,7 +63,7 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
         })
       );
 
-    this.packageSubscription = this.package$.subscribe(npmPackage => {
+    this.packageSubscription = combineLatest(this.package$, this.installedVersion$).subscribe(([npmPackage, installedVersion]) => {
       if (!npmPackage)
         return;
 
@@ -64,7 +72,8 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
       this.packageInstallForm.patchValue({
         name: npmPackage.name,
         version: npmPackage.distTags.latest,
-        updateLevel: 3
+        updateLevel: 3,
+        packageType: installedVersion ? installedVersion.type : PackageType.Dependency
       });
     });
 
@@ -90,14 +99,15 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
     const installCommand = new NpmInstallCommand({
       packageName: value.name,
       packageVersion: value.version,
-      updateLevel: value.updateLevel
+      updateLevel: value.updateLevel,
+      packageType: value.packageType
     });
 
     this.store.dispatch(installPackage({ value: installCommand }));
   }
 
   uninstallPackage() {
-    const uninstallCommand = new NpmUninstallCommand(this.npmPackage.name);
+    const uninstallCommand = new NpmUninstallCommand(this.npmPackage.name, this.installedVersion.type);
 
     this.store.dispatch(uninstallPackage({ value: uninstallCommand }));
   }

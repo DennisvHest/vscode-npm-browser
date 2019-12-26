@@ -1,4 +1,5 @@
 import { TerminalCommand } from "./terminal-command";
+import { PackageType } from '../package-type';
 
 export class NpmUninstallCommand implements TerminalCommand {
     type = 'npm-uninstall';
@@ -6,8 +7,22 @@ export class NpmUninstallCommand implements TerminalCommand {
     command: string;
 
     constructor(
-        public packageName: string
+        public packageName: string,
+        public packageType: PackageType
     ) {
-        this.command = `npm uninstall ${this.packageName}`;
+        let dependencyTypeFlag: string;
+
+        const optionFlags: string[] = [];
+
+        switch (packageType) {
+            case PackageType.Dependency: dependencyTypeFlag = '--save'; break;
+            case PackageType.DevDependency: dependencyTypeFlag = '--save-dev'; break;
+            case PackageType.OptionalDependency: dependencyTypeFlag = '--save-optional'; break;
+        }
+
+        if (dependencyTypeFlag)
+            optionFlags.push(dependencyTypeFlag);
+
+        this.command = `npm uninstall ${this.packageName}${optionFlags.map(o => ' ' + o).join()}`;
     }
 }

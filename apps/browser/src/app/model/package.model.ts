@@ -1,6 +1,6 @@
 import { Author } from './author.model';
 import { Version } from './version.model';
-import { DistributionTags } from './DistributionTags.model';
+import { DistributionTags } from './distribution-tags.model';
 
 export class Package {
     name: string;

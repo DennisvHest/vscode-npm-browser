@@ -3,25 +3,35 @@ import { PackageSearchResult } from '../model/package-search-result.model';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Package } from '../model/package.model';
-import { map } from 'rxjs/operators';
+import { map, tap } from 'rxjs/operators';
+import { ApplicationState } from '../state';
+import { Store } from '@ngrx/store';
+import { packageSearchResultChanged, packageSearchQueryChanged } from '../state/state.actions';
 
 @Injectable({
   providedIn: 'root'
 })
 export class PackageService {
 
-  private baseUrl = 'https://registry.npmjs.org';
+  private readonly baseUrl = 'https://registry.npmjs.org';
+  private readonly pageSize = 20;
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient, private store: Store<ApplicationState>) { }
 
-  search(searchText: string, page: number): Observable<PackageSearchResult> {
+  search(query: PackageSearchQuery): Observable<PackageSearchResult> {
+    this.store.dispatch(packageSearchQueryChanged({ value: query }));
+
     return this.http.get<PackageSearchResult>(`${this.baseUrl}/-/v1/search`, {
       params: {
-        text: searchText,
-        size: (20).toString(),
-        from: ((page - 1) * 20).toString()
+        text: query.searchText,
+        size: this.pageSize.toString(),
+        from: ((query.page - 1) * this.pageSize).toString()
       }
-    });
+    }).pipe(
+      tap(result => {
+        this.store.dispatch(packageSearchResultChanged({ value: result }));
+      })
+    );
   }
 
   getPackage(name: string): Observable<Package> {
