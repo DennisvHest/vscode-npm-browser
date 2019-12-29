@@ -19,9 +19,15 @@ const packageSearchResultInitialState = { objects: [], total: 0 } as PackageSear
 export function initialState() {
     const initialStateFromVSCode: ApplicationState = vscode.getState();
 
-    return initialStateFromVSCode
-        ? { ...initialStateFromVSCode, vscodeWorkspace: workspaceState, installingPackage: null }
-        : {
+    if (initialStateFromVSCode) {
+        let initialWorkspaceState = initialStateFromVSCode.vscodeWorkspace;
+
+        if (!initialWorkspaceState) // On fresh startup, workspace state is not present in state from vscode, so set it to the global workspace state.
+            initialWorkspaceState = workspaceState;
+
+        return { ...initialStateFromVSCode, vscodeWorkspace: initialWorkspaceState, installingPackage: null }
+    } else {
+        return {
             packageSearchQuery: packageSearchQueryInitialState,
             packageSearchResult: packageSearchResultInitialState,
             selectedPackageId: null,
@@ -29,6 +35,7 @@ export function initialState() {
             installingPackage: null,
             vscodeWorkspace: workspaceState
         };
+    }
 }
 
 export function packageSearchQueryReducer(state, action) {

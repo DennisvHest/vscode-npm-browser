@@ -1,7 +1,7 @@
-import { TerminalCommand } from "./terminal-command";
+import { PackageInstallationCommand } from "./package-installation-command";
 import { PackageType } from '../package-type';
 
-export class NpmUninstallCommand implements TerminalCommand {
+export class NpmUninstallCommand implements PackageInstallationCommand {
     type = 'npm-uninstall';
 
     command: string;

@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Observable, Subscription, combineLatest } from 'rxjs';
+import { Observable, Subscription, combineLatest, BehaviorSubject } from 'rxjs';
 import { Package } from '../../model/package.model';
 import { ApplicationState } from '../../state';
 import { Store, select } from '@ngrx/store';
@@ -22,7 +22,7 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
   installingPackage$: Observable<boolean>;
   uninstallingPackage$: Observable<boolean>;
 
-  selectedVersion$: Observable<semver.SemVer>;
+  selectedVersion$: semver.SemVer;
 
   installedVersion$: Observable<InstalledPackage>;
   installedVersion: InstalledPackage;
@@ -30,11 +30,12 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
   packageInstallForm = new FormGroup({
     name: new FormControl(),
     version: new FormControl(),
-    updateLevel: new FormControl(3),
+    updateLevel: new FormControl(2),
     packageType: new FormControl(PackageType.Dependency)
   });
 
   packageSubscription: Subscription;
+  selectedVersionSubscription: Subscription;
 
   PackageType = PackageType;
 
@@ -67,23 +68,29 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
       if (!npmPackage)
         return;
 
+      const packageChanged = !this.npmPackage || this.npmPackage.name !== npmPackage.name;
+
       this.npmPackage = npmPackage;
 
-      this.packageInstallForm.patchValue({
-        name: npmPackage.name,
-        version: npmPackage.distTags.latest,
-        updateLevel: 3,
-        packageType: installedVersion ? installedVersion.type : PackageType.Dependency
-      });
+      if (packageChanged) {
+        this.packageInstallForm.patchValue({
+          name: npmPackage.name,
+          version: npmPackage.distTags.latest,
+          updateLevel: 2,
+          packageType: installedVersion ? installedVersion.type : PackageType.Dependency
+        });
+      }
     });
 
-    this.selectedVersion$ = this.packageInstallForm.get('version').valueChanges.pipe(map(version => {
+    this.selectedVersionSubscription = this.packageInstallForm.get('version').valueChanges.pipe(map(version => {
       if (!version) {
         return null;
       } else {
         return semver.parse(version, true);
       }
-    }));
+    })).subscribe(version => {
+      this.selectedVersion$ = version;
+    });
   }
 
   openInstallationOptionsModal(content) {
@@ -114,5 +121,6 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.packageSubscription.unsubscribe();
+    this.selectedVersionSubscription.unsubscribe();
   }
 }

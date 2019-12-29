@@ -1,17 +1,19 @@
-import { TerminalCommand } from "./terminal-command";
 import { NpmInstallOptions } from '../npm-install-options';
 import { applyRangeOptions } from '../semver/semver-extensions';
 import { PackageType } from '../package-type';
+import { PackageInstallationCommand } from './package-installation-command';
 
-export class NpmInstallCommand implements TerminalCommand {
+export class NpmInstallCommand implements PackageInstallationCommand {
     type = 'npm-install';
 
     command: string;
     packageName: string;
     versionRange: string;
+    packageType: PackageType;
 
     constructor(options: NpmInstallOptions) {
         this.packageName = options.packageName;
+        this.packageType = options.packageType;
         this.versionRange = applyRangeOptions(options.packageVersion, options.updateLevel).raw;
 
         const optionFlags: string[] = [];

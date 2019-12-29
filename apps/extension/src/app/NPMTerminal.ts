@@ -1,7 +1,9 @@
 import * as vscode from 'vscode';
-import { TerminalCommand, CommandTypes, PackageJson, NpmInstallCommand } from '../../../../libs/shared/src/index'
+import { TerminalCommand, CommandTypes, PackageJson, NpmInstallCommand, PackageType } from '../../../../libs/shared/src/index'
 
 import * as fs from "fs";
+import { diff } from 'json-diff';
+import { PackageInstallationCommand } from 'libs/shared/src/lib/commands/package-installation-command';
 const readPackageJson = require('read-package-json');
 
 export class NPMTerminal {
@@ -20,7 +22,7 @@ export class NPMTerminal {
 
     onPackageJsonChange: ((packageJson: PackageJson) => void) | undefined;
 
-    private readonly postCommandListeners: { [key: string]: () => () => void} = {
+    private readonly postCommandListeners: { [key: string]: () => () => void } = {
         'npm-install': () => this.afterNPMInstall
     };
 
@@ -38,12 +40,7 @@ export class NPMTerminal {
 
         this._packageJsonFileWatcher = vscode.workspace.createFileSystemWatcher(this._packageJson!.filePath, true, false, true);
 
-        this._packageJsonFileWatcher.onDidChange(async (packageJsonUri) => {
-            const changedPackageJson = await this.loadPackageJson(packageJsonUri.fsPath);
-
-            if (this.onPackageJsonChange)
-                this.onPackageJsonChange(changedPackageJson);
-        });
+        this._packageJsonFileWatcher.onDidChange(this.onPackageJsonFileChanged);
     }
 
     async findPackageJsons(): Promise<PackageJson[]> {
@@ -55,6 +52,53 @@ export class NPMTerminal {
         let readPackageJsonFiles = packageJsonFiles.map(packageJsonUri => this.loadPackageJson(packageJsonUri.fsPath));
 
         return Promise.all(readPackageJsonFiles);
+    }
+
+    private onPackageJsonFileChanged = async (packageJsonUri) => {
+        let changedPackageJson = await this.loadPackageJson(packageJsonUri.fsPath);
+
+        changedPackageJson = { ...changedPackageJson, filePath: changedPackageJson.filePath };
+
+        this.checkPackageJsonDifferences(changedPackageJson);
+
+        this._packageJson = changedPackageJson;
+
+        if (this.onPackageJsonChange)
+            this.onPackageJsonChange(changedPackageJson);
+    }
+
+    private checkPackageJsonDifferences = (changedPackageJson: Object) => {
+        if (!this._currentCommand || this._currentCommand.type !== CommandTypes.npmInstall && this._currentCommand.type !== CommandTypes.npmUninstall)
+            return;
+
+        const packageJsonDiff = diff(this._packageJson, changedPackageJson);
+
+        if (!packageJsonDiff)
+            return; // No change
+
+        const currentCommand = this._currentCommand as PackageInstallationCommand;
+
+        let dependencyType;
+
+        switch (currentCommand.packageType) {
+            case PackageType.Dependency: dependencyType = "dependencies"; break;
+            case PackageType.DevDependency: dependencyType = "devDependencies"; break;
+            case PackageType.OptionalDependency: dependencyType = "optionalDependencies"; break;
+        }
+
+        const dependencies = packageJsonDiff[dependencyType];
+
+        // No change in dependencies, so no package (un)installed
+        if (!dependencies)
+            return;
+
+        if (this._currentCommand.type === CommandTypes.npmInstall && dependencies[`${currentCommand.packageName}__added`] || dependencies[currentCommand.packageName]) {
+            // Package was installed (as new or updated/downgraded version)
+            this.completeCommand();
+        } else if (this._currentCommand.type === CommandTypes.npmUninstall && dependencies[`${currentCommand.packageName}__deleted`]) {
+            // Package was uninstalled
+            this.completeCommand();
+        }
     }
 
     private loadPackageJson(filePath: string) {
@@ -81,8 +125,6 @@ export class NPMTerminal {
                 // TODO: Handle case where there is no package.json file in the workspace
                 cwd: this.packageJson!.filePath.replace(/package\.json$/, '')
             });
-
-            vscode.window.onDidWriteTerminalData(this.onTerminalData);
         }
 
         return this._terminal;
@@ -98,18 +140,6 @@ export class NPMTerminal {
         }
 
         return this.getTerminal();
-    }
-
-    private onTerminalData = (event: vscode.TerminalDataWriteEvent) => {
-        if (/\nadded \d* package/.test(event.data) && this._currentCommand && this._currentCommand.type === CommandTypes.npmInstall) {
-            this.completeCommand();
-            return;
-        }
-
-        if (/\nremoved \d* package/.test(event.data) && this._currentCommand && this._currentCommand.type === CommandTypes.npmUninstall) {
-            this.completeCommand();
-            return;
-        }
     }
 
     private completeCommand = async () => {

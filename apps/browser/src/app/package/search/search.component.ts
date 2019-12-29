@@ -44,8 +44,6 @@ export class SearchComponent implements OnInit {
       this.searchForm.patchValue(query);
       this.page = query.page;
       this.search();
-  
-      this.store.dispatch(selectedPackageChanged({ value: 'react-bootstrap' }));
     })
   }
 
