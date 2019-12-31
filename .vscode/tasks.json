@@ -23,10 +23,23 @@
             ],
         },
         {
+            "label": "copy-assets",
+            "command": "xcopy",
+            "type": "shell",
+            "args": [
+                "\"apps\\extension\\src\\assets\\*\"",
+                "\"dist\\apps\\extension\\src\\assets\"",
+                "/y",
+                "/i",
+                "/s",
+            ],
+        },
+        {
             "label": "build-extension",
             "dependsOn": [
                 "build-extension-src",
-                "copy-package-json"
+                "copy-package-json",
+                "copy-assets"
             ]
         }
     ]

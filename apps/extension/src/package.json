@@ -10,7 +10,7 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:npmBrowser.open"
+		"onView:dependencies"
 	],
 	"main": "./main.js",
 	"enableProposedApi": true,
@@ -20,6 +20,23 @@
 				"command": "npmBrowser.open",
 				"title": "Open NPM Browser"
 			}
-		]
+		],
+		"viewsContainers": {
+			"activitybar": [
+				{
+					"id": "npm-browser",
+					"title": "NPM Browser",
+					"icon": "assets/icon.svg"
+				}
+			]
+		},
+		"views": {
+			"npm-browser": [
+				{
+					"id": "dependencies",
+					"name": "Dependencies"
+				}
+			]
+		}
 	}
 }

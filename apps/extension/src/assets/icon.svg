@@ -1,0 +1,15 @@
+<svg width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+ <defs>
+  <style>.cls-1{fill:#c12127;}.cls-2{fill:#fff;}</style>
+ </defs>
+ <title>n</title>
+ <g>
+  <title>background</title>
+  <rect fill="none" id="canvas_background" height="402" width="582" y="-1" x="-1"/>
+ </g>
+ <g>
+  <title>Layer 1</title>
+  <path id="svg_1" d="m0,16l0,-16l16,0l0,16l-16,0zm3,-13l0,10l5,0l0,-8l3,0l0,8l2,0l0,-10l-10,0z" class="cls-1"/>
+  <path fill-opacity="0" fill="#000000" id="svg_2" d="m3,3l10,0l0,10l-2,0l0,-8l-3,0l0,8l-5,0l0,-10z" class="cls-2"/>
+ </g>
+</svg>
