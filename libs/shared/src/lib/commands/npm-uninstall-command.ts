@@ -23,6 +23,6 @@ export class NpmUninstallCommand implements PackageInstallationCommand {
         if (dependencyTypeFlag)
             optionFlags.push(dependencyTypeFlag);
 
-        this.command = `npm uninstall ${this.packageName}${optionFlags.map(o => ' ' + o).join()}`;
+        this.command = `npm uninstall ${this.packageName}${optionFlags.map(o => ' ' + o).join('')}`;
     }
 }

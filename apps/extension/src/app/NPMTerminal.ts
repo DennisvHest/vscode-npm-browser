@@ -125,9 +125,17 @@ export class NPMTerminal {
                 // TODO: Handle case where there is no package.json file in the workspace
                 cwd: this.packageJson!.filePath.replace(/package\.json$/, '')
             });
+
+            vscode.window.onDidWriteTerminalData(this.onTerminalData);
         }
 
         return this._terminal;
+    }
+
+    private onTerminalData = (event: vscode.TerminalDataWriteEvent) => {
+        if (/\nupdated \d* package/.test(event.data) && this._currentCommand && this._currentCommand.type === CommandTypes.npmInstall) {
+            this.completeCommand();
+        }
     }
 
     /**
@@ -141,6 +149,7 @@ export class NPMTerminal {
 
         return this.getTerminal();
     }
+    
 
     private completeCommand = async () => {
         if (this.postCommandListeners[this._currentCommand!.type])
