@@ -22,7 +22,7 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
   installingPackage$: Observable<boolean>;
   uninstallingPackage$: Observable<boolean>;
 
-  selectedVersion$: semver.SemVer;
+  selectedVersion: semver.SemVer;
 
   installedVersion$: Observable<InstalledPackage>;
   installedVersion: InstalledPackage;
@@ -64,6 +64,14 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
         })
       );
 
+    this.selectedVersionSubscription = this.packageInstallForm.get('version').valueChanges.pipe(map(version => {
+      if (!version) {
+        return null;
+      } else {
+        return semver.parse(version, true);
+      }
+    })).subscribe(version => this.selectedVersion = version);
+
     this.packageSubscription = combineLatest(this.package$, this.installedVersion$).subscribe(([npmPackage, installedVersion]) => {
       if (!npmPackage)
         return;
@@ -80,16 +88,6 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
           packageType: installedVersion ? installedVersion.type : PackageType.Dependency
         });
       }
-    });
-
-    this.selectedVersionSubscription = this.packageInstallForm.get('version').valueChanges.pipe(map(version => {
-      if (!version) {
-        return null;
-      } else {
-        return semver.parse(version, true);
-      }
-    })).subscribe(version => {
-      this.selectedVersion$ = version;
     });
   }
 

@@ -14,7 +14,7 @@
                             {{ version.version }}<ng-container *ngIf="version.distTags.length" > ({{ version.distTags.join(', ') }})</ng-container>
                         </option>
                     </select>
-                    <div *ngIf="selectedVersion$ as selectedVersion" class="input-group-append">
+                    <div *ngIf="selectedVersion" class="input-group-append">
                         <button type="submit" class="btn btn-primary" [class.installing]="installingPackage$ | async"
                             [disabled]="(uninstallingPackage$ | async) || (installingPackage$ | async)">
                             <div class="spinner-border spinner-border-sm text-light" role="status">
