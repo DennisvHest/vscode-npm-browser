@@ -1,42 +1,34 @@
 import * as vscode from 'vscode';
 import { BrowserWebView } from './app/BrowserWebView';
 import { NPMTerminal } from './app/NPMTerminal';
-import { CommandTypes, ToastLevels, ValueCommand, VSCodeToastCommand } from '../../../libs/shared/src';
-
-class DependencyTreeDataProvider implements vscode.TreeDataProvider<Object> {
-
-	readonly onDidChangeTreeData: vscode.Event<Object> = new vscode.EventEmitter<Object>().event;
-
-	getTreeItem(element: Object): vscode.TreeItem | Thenable<vscode.TreeItem> {
-		return element;
-	}
-
-	getChildren(element?: Object): vscode.ProviderResult<Object[]> {
-		return;
-	}
-
-	getParent?(element: Object): vscode.ProviderResult<Object> {
-		return;
-	}
-}
+import { CommandTypes, ToastLevels, ValueCommand, VSCodeToastCommand, PackageJson } from '../../../libs/shared/src';
+import { DependencyTreeDataProvider } from './app/DependencyTreeDataProvider';
 
 export function activate(context: vscode.ExtensionContext) {
 
 	const npmTerminal = new NPMTerminal();
+	let browser: BrowserWebView;
 
 	context.workspaceState.update('selectedPackageJson', null);
 
+	const selectedPackageJson: PackageJson = context.workspaceState.get('selectedPackageJson');
+
+	if (selectedPackageJson)
+		npmTerminal.setPackageJson(selectedPackageJson);
+
 	const treeView = vscode.window.createTreeView("dependencies", {
-		treeDataProvider: new DependencyTreeDataProvider()
+		treeDataProvider: new DependencyTreeDataProvider(npmTerminal.packageJson)
 	});
 
 	treeView.onDidChangeVisibility(async (event) => {
-		if (!event.visible)
+		if (!event.visible) {
 			return;
+		}
 
 		context.workspaceState.update('packageJsons', await npmTerminal.findPackageJsons());
 
-		const browser = new BrowserWebView(context, false);
+		if (!browser || !browser.isOpen)
+			browser = new BrowserWebView(context, false);
 
 		browser.onTerminalCommand = npmTerminal.runCommand;
 		browser.onValueCommand = onValueCommand;
@@ -59,7 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	function onValueCommand(command: ValueCommand) {
-		npmTerminal.packageJson = command.value;
+		npmTerminal.setPackageJson(command.value);
 		context.workspaceState.update('selectedPackageJson', command.value);
 	}
 
@@ -71,5 +63,7 @@ export function activate(context: vscode.ExtensionContext) {
 	}
 }
 
-export function deactivate() { }
+export function deactivate() {
+
+}
 

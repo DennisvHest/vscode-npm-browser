@@ -15,12 +15,6 @@
 	"main": "./main.js",
 	"enableProposedApi": true,
 	"contributes": {
-		"commands": [
-			{
-				"command": "npmBrowser.open",
-				"title": "Open NPM Browser"
-			}
-		],
 		"viewsContainers": {
 			"activitybar": [
 				{

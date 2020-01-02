@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
-import { TerminalCommand, CommandTypes, PackageJson, NpmInstallCommand, PackageType } from '../../../../libs/shared/src/index'
+import { TerminalCommand, CommandTypes, PackageJson, NpmInstallCommand, PackageType } from '../../../../libs/shared/src/index';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import * as fs from "fs";
 import { diff } from 'json-diff';
@@ -10,30 +11,35 @@ export class NPMTerminal {
 
     private _terminal: vscode.Terminal | undefined | null;
     private _currentCommand: TerminalCommand | undefined | null;
-    private _packageJson: PackageJson | undefined;
 
+    private _packageJson$: BehaviorSubject<PackageJson | undefined> = new BehaviorSubject<PackageJson | undefined>(undefined);
+    
     private _packageJsonFileWatcher: vscode.FileSystemWatcher | undefined;
-
+    
     /**
      * Function to run after a command completed execution. The completed
      * command is passed into the given function.
      */
     onCommandComplete: ((command?: TerminalCommand) => void) | undefined;
-
+    
     onPackageJsonChange: ((packageJson: PackageJson) => void) | undefined;
-
+    
     private readonly postCommandListeners: { [key: string]: () => () => void } = {
         'npm-install': () => this.afterNPMInstall
     };
-
+    
     constructor() { }
-
-    get packageJson() {
-        return this._packageJson;
+    
+    get packageJson(): Observable<PackageJson | undefined> {
+        return this._packageJson$;
     }
 
-    set packageJson(packageJson) {
-        this._packageJson = packageJson;
+    private get _packageJson(): PackageJson | undefined {
+        return this._packageJson$.value;
+    }
+
+    setPackageJson(packageJson: PackageJson) {
+        this._packageJson$.next(packageJson);
 
         if (this._packageJsonFileWatcher)
             this._packageJsonFileWatcher.dispose();
@@ -61,7 +67,7 @@ export class NPMTerminal {
 
         this.checkPackageJsonDifferences(changedPackageJson);
 
-        this._packageJson = changedPackageJson;
+        this._packageJson$.next(changedPackageJson);
 
         if (this.onPackageJsonChange)
             this.onPackageJsonChange(changedPackageJson);
@@ -123,7 +129,7 @@ export class NPMTerminal {
             this._terminal = vscode.window.createTerminal({
                 name: 'Install package',
                 // TODO: Handle case where there is no package.json file in the workspace
-                cwd: this.packageJson!.filePath.replace(/package\.json$/, '')
+                cwd: this._packageJson!.filePath.replace(/package\.json$/, '')
             });
 
             vscode.window.onDidWriteTerminalData(this.onTerminalData);
@@ -164,11 +170,11 @@ export class NPMTerminal {
     private afterNPMInstall = () => {
         const installCommand = this._currentCommand as NpmInstallCommand;
 
-        const packageJson: PackageJson = JSON.parse(fs.readFileSync(this.packageJson!.filePath, 'utf8'));
+        const packageJson: PackageJson = JSON.parse(fs.readFileSync(this._packageJson!.filePath, 'utf8'));
 
         packageJson.dependencies[installCommand.packageName] = installCommand.versionRange;
 
-        fs.writeFileSync(this.packageJson!.filePath, JSON.stringify(packageJson, null, 2))
+        fs.writeFileSync(this._packageJson!.filePath, JSON.stringify(packageJson, null, 2))
     }
 
     /**

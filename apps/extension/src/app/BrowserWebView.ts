@@ -7,6 +7,8 @@ export class BrowserWebView {
     private _context: vscode.ExtensionContext;
     private _panel: vscode.WebviewPanel;
 
+    isOpen: boolean;
+
     onTerminalCommand: ((command: TerminalCommand) => void) | undefined;
     onValueCommand: ((command: ValueCommand) => void) | undefined;
     onVSCodeToastCommand: ((command: VSCodeToastCommand) => void) | undefined;
@@ -43,6 +45,10 @@ export class BrowserWebView {
                 localResourceRoots: [this.getAssetUri()]
             }
         );
+
+        this.isOpen = true;
+
+        this._panel.onDidDispose(() => this.isOpen = false);
 
         this._panel.webview.html = this.getWebviewContent(production);
 
