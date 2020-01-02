@@ -3,6 +3,10 @@ import { BrowserWebView } from './app/BrowserWebView';
 import { NPMTerminal } from './app/NPMTerminal';
 import { CommandTypes, ToastLevels, ValueCommand, VSCodeToastCommand, PackageJson } from '../../../libs/shared/src';
 import { DependencyTreeDataProvider } from './app/DependencyTreeDataProvider';
+import { Subscription } from 'rxjs';
+
+let packageJsonSubscription: Subscription;
+let packageJsonsSubscription: Subscription;
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -21,11 +25,8 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	treeView.onDidChangeVisibility(async (event) => {
-		if (!event.visible) {
+		if (!event.visible)
 			return;
-		}
-
-		context.workspaceState.update('packageJsons', await npmTerminal.findPackageJsons());
 
 		if (!browser || !browser.isOpen)
 			browser = new BrowserWebView(context, false);
@@ -41,18 +42,10 @@ export function activate(context: vscode.ExtensionContext) {
 			if (command.type === CommandTypes.npmUninstall)
 				browser.sendCommand({ type: CommandTypes.npmUninstallComplete });
 		}
-
-		npmTerminal.onPackageJsonChange = changedPackageJson => {
-			context.workspaceState.update('selectedPackageJson', changedPackageJson);
-
-			const command: ValueCommand = { type: CommandTypes.packageJsonUpdated, value: changedPackageJson };
-			browser.sendCommand(command);
-		}
 	});
 
 	function onValueCommand(command: ValueCommand) {
 		npmTerminal.setPackageJson(command.value);
-		context.workspaceState.update('selectedPackageJson', command.value);
 	}
 
 	function onVSCodeToastCommand(command: VSCodeToastCommand) {
@@ -61,9 +54,33 @@ export function activate(context: vscode.ExtensionContext) {
 			default: vscode.window.showInformationMessage(command.message); break;
 		}
 	}
+
+	this.packageJsonsSubscription = npmTerminal.packageJsons.subscribe(packageJsons => {
+		context.workspaceState.update('packageJsons', packageJsons);
+
+		if (browser) {
+			const command: ValueCommand = { type: CommandTypes.packageJsonsUpdated, value: packageJsons };
+			browser.sendCommand(command);
+		}
+	});
+
+	this.packageJsonSubscription = npmTerminal.packageJson.subscribe(changedPackageJson => {
+		context.workspaceState.update('selectedPackageJson', changedPackageJson);
+
+		if (browser) {
+			const command: ValueCommand = { type: CommandTypes.packageJsonUpdated, value: changedPackageJson };
+			browser.sendCommand(command);
+		}
+	});
+
+	npmTerminal.findPackageJsons();
 }
 
 export function deactivate() {
+	if (packageJsonSubscription)
+		packageJsonSubscription.unsubscribe();
 
+	if (packageJsonsSubscription)
+		packageJsonsSubscription.unsubscribe();
 }
 

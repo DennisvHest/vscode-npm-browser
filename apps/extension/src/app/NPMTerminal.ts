@@ -13,23 +13,28 @@ export class NPMTerminal {
     private _currentCommand: TerminalCommand | undefined | null;
 
     private _packageJson$: BehaviorSubject<PackageJson | undefined> = new BehaviorSubject<PackageJson | undefined>(undefined);
-    
+    private _packageJsons$: BehaviorSubject<PackageJson[]> = new BehaviorSubject<PackageJson[]>([]);
+
     private _packageJsonFileWatcher: vscode.FileSystemWatcher | undefined;
-    
+
     /**
      * Function to run after a command completed execution. The completed
      * command is passed into the given function.
      */
     onCommandComplete: ((command?: TerminalCommand) => void) | undefined;
-    
-    onPackageJsonChange: ((packageJson: PackageJson) => void) | undefined;
-    
+
     private readonly postCommandListeners: { [key: string]: () => () => void } = {
         'npm-install': () => this.afterNPMInstall
     };
-    
-    constructor() { }
-    
+
+    constructor() {
+        const packageJsonsFileWatcher = vscode.workspace.createFileSystemWatcher('**/package.json');
+
+        packageJsonsFileWatcher.onDidChange(this.onPackageJsonsChanged);
+        packageJsonsFileWatcher.onDidCreate(this.onPackageJsonsChanged);
+        packageJsonsFileWatcher.onDidDelete(this.onPackageJsonsChanged);
+    }
+
     get packageJson(): Observable<PackageJson | undefined> {
         return this._packageJson$;
     }
@@ -38,26 +43,40 @@ export class NPMTerminal {
         return this._packageJson$.value;
     }
 
+    get packageJsons(): Observable<PackageJson[]> {
+        return this._packageJsons$;
+    }
+
     setPackageJson(packageJson: PackageJson) {
         this._packageJson$.next(packageJson);
 
         if (this._packageJsonFileWatcher)
             this._packageJsonFileWatcher.dispose();
 
-        this._packageJsonFileWatcher = vscode.workspace.createFileSystemWatcher(this._packageJson!.filePath, true, false, true);
+        this._packageJsonFileWatcher = vscode.workspace.createFileSystemWatcher(this._packageJson!.filePath, true, false, false);
 
         this._packageJsonFileWatcher.onDidChange(this.onPackageJsonFileChanged);
+        this._packageJsonFileWatcher.onDidDelete(this.onPackageJsonFileDeleted);
     }
 
-    async findPackageJsons(): Promise<PackageJson[]> {
-        let packageJsonFiles = await vscode.workspace.findFiles('**/package.json', '**/node_modules/**');
+    private onPackageJsonsChanged = (uri: vscode.Uri) => {
+        if (!uri.path.includes('**/node_modules/**'))
+            this.findPackageJsons();
+    }
+
+    async findPackageJsons() {
+        const packageJsonFiles = await vscode.workspace.findFiles('**/package.json', '**/node_modules/**');
 
         if (!packageJsonFiles.length)
-            return [];
+            this._packageJsons$.next([]);
 
-        let readPackageJsonFiles = packageJsonFiles.map(packageJsonUri => this.loadPackageJson(packageJsonUri.fsPath));
+        const readPackageJsonFiles = packageJsonFiles
+            .map(packageJsonUri => this.loadPackageJson(packageJsonUri.fsPath))
+            .map(p => p.catch(e => null)); // Ignore failed reads
 
-        return Promise.all(readPackageJsonFiles);
+        const packageJsons = (await Promise.all(readPackageJsonFiles)).filter(f => f !== null);
+
+        this._packageJsons$.next(packageJsons);
     }
 
     private onPackageJsonFileChanged = async (packageJsonUri) => {
@@ -68,9 +87,12 @@ export class NPMTerminal {
         this.checkPackageJsonDifferences(changedPackageJson);
 
         this._packageJson$.next(changedPackageJson);
+    }
 
-        if (this.onPackageJsonChange)
-            this.onPackageJsonChange(changedPackageJson);
+    private onPackageJsonFileDeleted = async () => {
+        await this.findPackageJsons();
+
+        this._packageJson$.next(null)
     }
 
     private checkPackageJsonDifferences = (changedPackageJson: Object) => {
@@ -80,7 +102,7 @@ export class NPMTerminal {
         const packageJsonDiff = diff(this._packageJson, changedPackageJson);
 
         if (!packageJsonDiff)
-            return; // No change
+            return; // No change.
 
         const currentCommand = this._currentCommand as PackageInstallationCommand;
 
@@ -92,17 +114,20 @@ export class NPMTerminal {
             case PackageType.OptionalDependency: dependencyType = "optionalDependencies"; break;
         }
 
+        if (packageJsonDiff[`${dependencyType}__added`])
+            this.completeCommand(); // package.json did not have dependencies before, but does now.
+
         const dependencies = packageJsonDiff[dependencyType];
 
-        // No change in dependencies, so no package (un)installed
+        // No change in dependencies, so no package (un)installed.
         if (!dependencies)
             return;
 
         if (this._currentCommand.type === CommandTypes.npmInstall && dependencies[`${currentCommand.packageName}__added`] || dependencies[currentCommand.packageName]) {
-            // Package was installed (as new or updated/downgraded version)
+            // Package was installed (as new or updated/downgraded version).
             this.completeCommand();
         } else if (this._currentCommand.type === CommandTypes.npmUninstall && dependencies[`${currentCommand.packageName}__deleted`]) {
-            // Package was uninstalled
+            // Package was uninstalled.
             this.completeCommand();
         }
     }
@@ -155,7 +180,7 @@ export class NPMTerminal {
 
         return this.getTerminal();
     }
-    
+
 
     private completeCommand = async () => {
         if (this.postCommandListeners[this._currentCommand!.type])

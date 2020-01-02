@@ -1,5 +1,5 @@
 import { ActionReducerMap, createReducer, on } from '@ngrx/store';
-import { packageSearchResultChanged, selectedPackageChanged, currentPackageLoaded, installPackage, installPackageComplete, packageJsonSelected, packageJsonUpdated, uninstallPackage, uninstallPackageComplete, packageSearchQueryChanged } from './state.actions';
+import { packageSearchResultChanged, selectedPackageChanged, currentPackageLoaded, installPackage, installPackageComplete, packageJsonSelected, packageJsonUpdated, uninstallPackage, uninstallPackageComplete, packageSearchQueryChanged, packageJsonsUpdated } from './state.actions';
 import { PackageSearchResult } from '../model/package-search-result.model';
 import { Package } from '../model/package.model';
 
@@ -94,7 +94,10 @@ export function vscodeWorkspaceReducer(state, action) {
 
     return createReducer(null,
         on(packageJsonSelected, (currentState, { value }) => updatePackageJson(currentState, value)),
-        on(packageJsonUpdated, (currentState, { value }) => updatePackageJson(currentState, { value: value }))
+        on(packageJsonUpdated, (currentState, { value }) => updatePackageJson(currentState, { value: value })),
+        on(packageJsonsUpdated, (currentState, { value }) => {
+            return { ...currentState, packageJsons: value };
+        })
     )(state, action);
 }
 

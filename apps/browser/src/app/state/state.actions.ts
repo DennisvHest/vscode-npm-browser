@@ -48,6 +48,11 @@ export const packageJsonUpdated = createAction(
     props<{ value: PackageJson }>()
 );
 
+export const packageJsonsUpdated = createAction(
+    '[Install] Package.jsons updated.',
+    props<{ value: PackageJson[] }>()
+);
+
 // Settings actions
 export const packageJsonSelected = createAction(
     "[Settings] Package.json selected.",
