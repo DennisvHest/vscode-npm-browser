@@ -1,11 +1,11 @@
-<ng-container *ngIf="(package$ | async) as npmPackage">
+<ng-container *ngIf="npmPackage">
     <div id="package-header" class="row">
         <div>
             <fa-icon [icon]="['fas', 'cube']" size="10x"></fa-icon>
         </div>
         <div class="col">
             <h1>{{ npmPackage.name }}</h1>
-            <h6>{{ npmPackage.author.name }}</h6>
+            <h6 *ngIf="npmPackage.author">{{ npmPackage.author.name }}</h6>
             <p>{{ npmPackage.description }}</p>
             <form [formGroup]="packageInstallForm" (ngSubmit)="installPackage()">
                 <div class="d-flex">
