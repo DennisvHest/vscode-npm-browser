@@ -64,8 +64,10 @@ export class PackageJsonSelectorComponent implements OnInit, AfterViewInit, OnDe
           return;
         }
 
-        // Multiple package.json files found. User has to select one.
-        this.openModal(false);
+        if (!this.modalService.hasOpenModals()) {
+          // Multiple package.json files found. User has to select one.
+          this.openModal(false);
+        }
       });
   }
 
