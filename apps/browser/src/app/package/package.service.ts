@@ -1,12 +1,14 @@
 import { Injectable } from '@angular/core';
 import { PackageSearchResult } from '../model/package-search-result.model';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { Package } from '../model/package.model';
-import { map, tap } from 'rxjs/operators';
+import { map, tap, catchError } from 'rxjs/operators';
 import { ApplicationState } from '../state';
 import { Store } from '@ngrx/store';
 import { packageSearchResultChanged, packageSearchQueryChanged } from '../state/state.actions';
+import { VSCodeService } from '../vscode/vscode.service';
+import { VSCodeToastCommand, ToastLevels } from 'libs/shared/src';
 
 @Injectable({
   providedIn: 'root'
@@ -16,7 +18,7 @@ export class PackageService {
   private readonly baseUrl = 'https://registry.npmjs.org';
   private readonly pageSize = 20;
 
-  constructor(private http: HttpClient, private store: Store<ApplicationState>) { }
+  constructor(private http: HttpClient, private store: Store<ApplicationState>, private vsCodeService: VSCodeService) { }
 
   search(query: PackageSearchQuery): Observable<PackageSearchResult> {
     this.store.dispatch(packageSearchQueryChanged({ value: query }));
@@ -30,6 +32,11 @@ export class PackageService {
     }).pipe(
       tap(result => {
         this.store.dispatch(packageSearchResultChanged({ value: result }));
+      }),
+      catchError(error =>  {
+        this.reportRequestError(error);
+
+        return of(null);
       })
     );
   }
@@ -55,7 +62,16 @@ export class PackageService {
           returnNpmPackage.author = null;
 
         return npmPackage as Package;
+      }),
+      catchError(error =>  {
+        this.reportRequestError(error);
+
+        return of(null);
       })
     );
+  }
+
+  private reportRequestError(error) {
+    this.vsCodeService.postCommand(new VSCodeToastCommand(`Request to NPM Registry failed (HTTP Status: ${error.status}).`, ToastLevels.error))
   }
 }

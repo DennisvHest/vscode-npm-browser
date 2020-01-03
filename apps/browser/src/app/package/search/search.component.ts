@@ -8,7 +8,7 @@ import { Store, select } from '@ngrx/store';
 import { ApplicationState } from '../../state';
 import { packageSearchResultChanged, selectedPackageChanged } from '../../state/state.actions';
 import { getPackageSearchResult, getSelectedPackageName, getPackageSearchQuery } from '../../state/state.selectors';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'npmb-search',
@@ -23,7 +23,7 @@ export class SearchComponent implements OnInit {
   currentPackageName$: Observable<string>;
 
   searchForm = new FormGroup({
-    searchText: new FormControl('')
+    searchText: new FormControl('', Validators.required)
   });
 
   page = 1;

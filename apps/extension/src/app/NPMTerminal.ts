@@ -47,11 +47,14 @@ export class NPMTerminal {
         return this._packageJsons$;
     }
 
-    setPackageJson(packageJson: PackageJson) {
+    setPackageJson = (packageJson: PackageJson) => {
         this._packageJson$.next(packageJson);
 
         if (this._packageJsonFileWatcher)
             this._packageJsonFileWatcher.dispose();
+
+        if (!this._packageJson)
+            return;
 
         this._packageJsonFileWatcher = vscode.workspace.createFileSystemWatcher(this._packageJson!.filePath, true, false, false);
 
@@ -64,7 +67,7 @@ export class NPMTerminal {
             this.findPackageJsons();
     }
 
-    async findPackageJsons() {
+    findPackageJsons = async () => {
         const packageJsonFiles = await vscode.workspace.findFiles('**/package.json', '**/node_modules/**');
 
         if (!packageJsonFiles.length)
@@ -80,11 +83,21 @@ export class NPMTerminal {
     }
 
     private onPackageJsonFileChanged = async (packageJsonUri) => {
-        let changedPackageJson = await this.loadPackageJson(packageJsonUri.fsPath);
+        let changedPackageJson;
 
-        changedPackageJson = { ...changedPackageJson, filePath: changedPackageJson.filePath };
+        try {
+            changedPackageJson = await this.loadPackageJson(packageJsonUri.fsPath);
+        } catch (error) {
+            changedPackageJson = null;
+        }
 
-        this.checkPackageJsonDifferences(changedPackageJson);
+        if (changedPackageJson) {
+            changedPackageJson = { ...changedPackageJson, filePath: changedPackageJson.filePath };
+    
+            this.checkPackageJsonDifferences(changedPackageJson);
+        } else {
+            await this.findPackageJsons();
+        }
 
         this._packageJson$.next(changedPackageJson);
     }
@@ -106,13 +119,7 @@ export class NPMTerminal {
 
         const currentCommand = this._currentCommand as PackageInstallationCommand;
 
-        let dependencyType;
-
-        switch (currentCommand.packageType) {
-            case PackageType.Dependency: dependencyType = "dependencies"; break;
-            case PackageType.DevDependency: dependencyType = "devDependencies"; break;
-            case PackageType.OptionalDependency: dependencyType = "optionalDependencies"; break;
-        }
+        const dependencyType = this.getPackageJsonDependencyField(currentCommand.packageType);
 
         if (packageJsonDiff[`${dependencyType}__added`])
             this.completeCommand(); // package.json did not have dependencies before, but does now.
@@ -132,6 +139,15 @@ export class NPMTerminal {
         }
     }
 
+    private getPackageJsonDependencyField(packageType: PackageType) {
+        switch (packageType) {
+            case PackageType.Dependency: return "dependencies";
+            case PackageType.DevDependency: return "devDependencies";
+            case PackageType.OptionalDependency: return "optionalDependencies";
+            default: throw "Unknown package type!"
+        }
+    }
+
     private loadPackageJson(filePath: string) {
         return new Promise<PackageJson>((resolve, reject) => {
             readPackageJson(filePath, false, (error, data: PackageJson) => {
@@ -144,6 +160,17 @@ export class NPMTerminal {
                 resolve(data);
             });
         });
+    }
+
+    async reloadPackageJson() {
+        if (this._packageJson) {
+            try {
+                const currentPackageJson = await this.loadPackageJson(this._packageJson!.filePath);
+                this.setPackageJson(currentPackageJson);
+            } catch (error) {
+                this.setPackageJson(null);
+            }
+        }
     }
 
     /**
@@ -197,7 +224,13 @@ export class NPMTerminal {
 
         const packageJson: PackageJson = JSON.parse(fs.readFileSync(this._packageJson!.filePath, 'utf8'));
 
-        packageJson.dependencies[installCommand.packageName] = installCommand.versionRange;
+        const dependencyType = this.getPackageJsonDependencyField(installCommand.packageType);
+
+        if (packageJson.dependencies && packageJson.dependencies[installCommand.packageName])
+            packageJson.dependencies[installCommand.packageName] = installCommand.versionRange;
+
+        if (packageJson[dependencyType] && packageJson[dependencyType][installCommand.packageName])
+            packageJson[dependencyType][installCommand.packageName] = installCommand.versionRange;
 
         fs.writeFileSync(this._packageJson!.filePath, JSON.stringify(packageJson, null, 2))
     }

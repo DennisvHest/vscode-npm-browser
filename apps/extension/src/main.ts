@@ -27,7 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 
 		if (!browser || !browser.isOpen)
-			browser = new BrowserWebView(context, true);
+			browser = new BrowserWebView(context, false);
 
 		browser.onTerminalCommand = npmTerminal.runCommand;
 		browser.onValueCommand = onValueCommand;
@@ -48,6 +48,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	function onVSCodeToastCommand(command: VSCodeToastCommand) {
 		switch (command.level) {
+			case ToastLevels.error: vscode.window.showErrorMessage(command.message); break;
 			case ToastLevels.info:
 			default: vscode.window.showInformationMessage(command.message); break;
 		}
@@ -56,7 +57,7 @@ export function activate(context: vscode.ExtensionContext) {
 	this.packageJsonsSubscription = npmTerminal.packageJsons.subscribe(packageJsons => {
 		context.workspaceState.update('packageJsons', packageJsons);
 
-		if (browser) {
+		if (browser && browser.isOpen) {
 			const command: ValueCommand = { type: CommandTypes.packageJsonsUpdated, value: packageJsons };
 			browser.sendCommand(command);
 		}
@@ -65,13 +66,14 @@ export function activate(context: vscode.ExtensionContext) {
 	this.packageJsonSubscription = npmTerminal.packageJson.subscribe(changedPackageJson => {
 		context.workspaceState.update('selectedPackageJson', changedPackageJson);
 
-		if (browser) {
+		if (browser && browser.isOpen) {
 			const command: ValueCommand = { type: CommandTypes.packageJsonUpdated, value: changedPackageJson };
 			browser.sendCommand(command);
 		}
 	});
 
 	npmTerminal.findPackageJsons();
+	npmTerminal.reloadPackageJson();
 }
 
 export function deactivate() {
