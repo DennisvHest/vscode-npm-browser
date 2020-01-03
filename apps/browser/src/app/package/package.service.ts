@@ -49,6 +49,11 @@ export class PackageService {
           return version;
         });
 
+        const returnNpmPackage = npmPackage as Package;
+
+        if (!returnNpmPackage.author)
+          returnNpmPackage.author = null;
+
         return npmPackage as Package;
       })
     );

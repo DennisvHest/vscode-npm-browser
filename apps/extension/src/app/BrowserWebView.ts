@@ -105,7 +105,7 @@ export class BrowserWebView {
                     <meta http-equiv="Content-Security-Policy" content="${contentSecurityPolicies.join(';')}">
                     <meta name="viewport" content="width=device-width, initial-scale=1">
                     <link rel="icon" type="image/x-icon" href="favicon.ico">
-                    ${production ? '<link rel="stylesheet" href="styles.css">' : ''}
+                    ${production ? `<link rel="stylesheet" href="${this.getAssetResourceUri('styles.css')}">` : ''}
                 </head>
                 <body>
                     <npmb-root></npmb-root>

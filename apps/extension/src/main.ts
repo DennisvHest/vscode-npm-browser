@@ -13,15 +13,13 @@ export function activate(context: vscode.ExtensionContext) {
 	const npmTerminal = new NPMTerminal();
 	let browser: BrowserWebView;
 
-	context.workspaceState.update('selectedPackageJson', null);
-
 	const selectedPackageJson: PackageJson = context.workspaceState.get('selectedPackageJson');
 
 	if (selectedPackageJson)
 		npmTerminal.setPackageJson(selectedPackageJson);
 
 	const treeView = vscode.window.createTreeView("dependencies", {
-		treeDataProvider: new DependencyTreeDataProvider(npmTerminal.packageJson)
+		treeDataProvider: new DependencyTreeDataProvider(npmTerminal.packageJson, context)
 	});
 
 	treeView.onDidChangeVisibility(async (event) => {
@@ -29,7 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 
 		if (!browser || !browser.isOpen)
-			browser = new BrowserWebView(context, false);
+			browser = new BrowserWebView(context, true);
 
 		browser.onTerminalCommand = npmTerminal.runCommand;
 		browser.onValueCommand = onValueCommand;

@@ -26,12 +26,16 @@ npmb-package-detail .tab-content {
 /* Bootstrap overrides */
 .list-group-item {
     background-color: transparent;
-    color: inherit;
+    color: var(--vscode-editor-foreground);
+
+    h1, h2, h3, h4, h5, h6, p {
+        color:  var(--vscode-editor-foreground);
+    }
 
     h5 {
-        color: inherit;
         font-weight: bold;
         font-size: inherit;
+        word-break: break-all;
     }
 
     &.active {
@@ -43,8 +47,8 @@ npmb-package-detail .tab-content {
 .list-group-item-action:focus:not(.active),
 .list-group-item-action:hover:not(.active) {
     cursor: pointer;
-    color: var(--vscode-button-foreground);
-    background-color: var(--vscode-editor-rangeHighlightBackground);
+    color: var(--vscode-editor-foreground);
+    background-color: var(--vscode-tab-inactiveBackground);
 }
 
 .form-control,
@@ -96,6 +100,10 @@ label {
     opacity: 1;
     background-color: rgba(78, 163, 255, 0.3);
     border-color: rgba(78, 163, 255, 0.3);
+}
+
+.text-muted {
+    color: var(--vscode-editorLineNumber-foreground) !important;
 }
 
 .alert-info {
@@ -174,4 +182,8 @@ pre {
 code[class*="language-"],
 pre[class*="language-"] {
     color: var(--vscode-editor-foreground);
+
+    .token.punctuation, .token.operator, .token.entity, .token.url, .language-css .token.string, .style .token.string, .token.variable {
+        color: var(--vscode-editor-foreground);
+    }
 }

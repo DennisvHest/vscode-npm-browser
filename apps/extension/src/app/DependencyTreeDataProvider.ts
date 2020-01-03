@@ -13,7 +13,7 @@ export class DependencyTreeDataProvider implements vscode.TreeDataProvider<vscod
     
     private _packageJson: PackageJson | undefined;
 
-    constructor(private _packageJson$: Observable<PackageJson | undefined>) {
+    constructor(private _packageJson$: Observable<PackageJson | undefined>, private _context: vscode.ExtensionContext) {
         this._packageJsonSubscription = this._packageJson$.subscribe(packageJson => {
             this._packageJson = packageJson;
 
@@ -33,13 +33,13 @@ export class DependencyTreeDataProvider implements vscode.TreeDataProvider<vscod
 
             if (this._packageJson) {
                 dependencies = Object.keys(this._packageJson.dependencies ? this._packageJson.dependencies : {})
-                    .map(packageName => new DependencyTreeItem(packageName, this._packageJson.dependencies[packageName]));
+                    .map(packageName => new DependencyTreeItem(packageName, this._packageJson.dependencies[packageName], this._context));
 
                 devDependencies = Object.keys(this._packageJson.devDependencies ? this._packageJson.devDependencies : {})
-                    .map(packageName => new DependencyTreeItem(packageName, this._packageJson.devDependencies[packageName]));
+                    .map(packageName => new DependencyTreeItem(packageName, this._packageJson.devDependencies[packageName], this._context));
 
                 optionalDependencies = Object.keys(this._packageJson.optionalDependencies ? this._packageJson.optionalDependencies : {})
-                    .map(packageName => new DependencyTreeItem(packageName, this._packageJson.optionalDependencies[packageName]));
+                    .map(packageName => new DependencyTreeItem(packageName, this._packageJson.optionalDependencies[packageName], this._context));
             }
 
             return [

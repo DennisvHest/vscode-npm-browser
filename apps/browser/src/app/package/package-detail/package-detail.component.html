@@ -6,7 +6,7 @@
         <div class="col">
             <h1>{{ npmPackage.name }}</h1>
             <h6 *ngIf="npmPackage.author">{{ npmPackage.author.name }}</h6>
-            <p>{{ npmPackage.description }}</p>
+            <p id="package-description" [title]="npmPackage.description">{{ npmPackage.description }}</p>
             <form [formGroup]="packageInstallForm" (ngSubmit)="installPackage()">
                 <div class="d-flex">
                     <select formControlName="version" class="form-control">
@@ -111,15 +111,6 @@
                         <div *ngIf="!npmPackage.readme" class="alert alert-info">
                             <fa-icon [icon]="['fas', 'info-circle']"></fa-icon> This package does not have a readme.
                         </div>
-                    </div>
-                </div>
-            </ng-template>
-        </ngb-tab>
-        <ngb-tab title="Versions">
-            <ng-template ngbTabContent>
-                <div class="row">
-                    <div class="col">
-                        <p>Versions</p>
                     </div>
                 </div>
             </ng-template>

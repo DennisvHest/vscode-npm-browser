@@ -1,8 +1,15 @@
-import { TreeItem, TreeItemCollapsibleState } from 'vscode';
+import * as path from 'path';
+import * as vscode from 'vscode';
+import { TreeItem } from 'vscode';
 
 export class DependencyTreeItem extends TreeItem {
     
-    constructor(name, version) {
+    constructor(name, version, context: vscode.ExtensionContext) {
         super(`${name} (${version})`);
+
+        this.iconPath = {
+            light: vscode.Uri.file(path.join(context.extensionPath, 'assets', 'dependency-light.svg')),
+            dark: vscode.Uri.file(path.join(context.extensionPath, 'assets', 'dependency-dark.svg'))
+        };
     }
 }

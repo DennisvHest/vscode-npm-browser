@@ -1,3 +1,5 @@
+@import "../../../mixins.less";
+
 .row {
     margin-right: 0;
     margin-left: 0;
@@ -6,7 +8,7 @@
 #package-header {
     position: absolute;
     top: 0;
-    height: 200px;
+    height: 220px;
     left: 0;
     right: 0;
     padding: 15px;
@@ -16,10 +18,14 @@
     }
 }
 
+#package-description {
+    .truncate-lines(2);
+}
+
 ngb-tabset {
     position: absolute;
     bottom: 0;
-    top: 200px;
+    top: 220px;
     left: 0;
     right: 0;
 }
