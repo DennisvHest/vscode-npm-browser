@@ -14,7 +14,7 @@
 	"activationEvents": [
 		"onView:dependencies"
 	],
-	"main": "./main.js",
+	"main": "./apps/extension/src/main.js",
 	"enableProposedApi": true,
 	"contributes": {
 		"viewsContainers": {
@@ -22,7 +22,7 @@
 				{
 					"id": "npm-browser",
 					"title": "NPM Browser",
-					"icon": "assets/icon.svg"
+					"icon": "./apps/extension/assets/icon.svg"
 				}
 			]
 		},

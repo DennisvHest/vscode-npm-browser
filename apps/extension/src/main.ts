@@ -27,7 +27,7 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 
 		if (!browser || !browser.isOpen)
-			browser = new BrowserWebView(context, true);
+			browser = new BrowserWebView(context, false);
 
 		browser.onTerminalCommand = npmTerminal.runCommand;
 		browser.onValueCommand = onValueCommand;

@@ -17,12 +17,12 @@
             "request": "launch",
             "runtimeExecutable": "${execPath}",
             "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}/dist/apps/extension"
+                "--extensionDevelopmentPath=${workspaceFolder}/dist"
             ],
             "trace": "false",
             "internalConsoleOptions": "openOnFirstSessionStart",
             "outFiles": [
-                "${workspaceFolder}/dist/apps/extension",
+                "${workspaceFolder}/dist",
                 "${workspaceFolder}/node_modules"
             ],
             "preLaunchTask": "build-extension"

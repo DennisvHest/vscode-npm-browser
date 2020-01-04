@@ -18,7 +18,7 @@
             "type": "shell",
             "args": [
                 "\"apps\\extension\\src\\package.json\"",
-                "\"dist\\apps\\extension\\src\\package.json*\"",
+                "\"dist\\package.json*\"",
                 "/y",
             ],
         },
