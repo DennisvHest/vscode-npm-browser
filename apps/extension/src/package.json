@@ -2,9 +2,11 @@
 	"name": "npm-browser",
 	"displayName": "NPM Browser",
 	"description": "",
-	"version": "0.5.0",
+	"publisher": "dennisvhest",
+	"repository": "https://github.com/DennisvHest/vscode-npm-browser",
+	"version": "1.0.0-beta",
 	"engines": {
-		"vscode": "^1.37.0"
+		"vscode": "^1.30.0"
 	},
 	"categories": [
 		"Other"
