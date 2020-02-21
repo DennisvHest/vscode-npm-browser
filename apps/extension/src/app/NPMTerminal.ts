@@ -3,13 +3,10 @@ import { TerminalCommand, CommandTypes, PackageJson, NpmInstallCommand, PackageT
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import * as fs from "fs";
-import { diff } from 'json-diff';
-import { PackageInstallationCommand } from 'libs/shared/src/lib/commands/package-installation-command';
-const readPackageJson = require('read-package-json');
+import * as readPackageJson from 'read-package-json';
 
 export class NPMTerminal {
 
-    private _terminal: vscode.Terminal | undefined | null;
     private _currentCommand: TerminalCommand | undefined | null;
 
     private _packageJson$: BehaviorSubject<PackageJson | undefined> = new BehaviorSubject<PackageJson | undefined>(undefined);
@@ -21,7 +18,7 @@ export class NPMTerminal {
      * Function to run after a command completed execution. The completed
      * command is passed into the given function.
      */
-    onCommandComplete: ((command?: TerminalCommand) => void) | undefined;
+    onCommandComplete: ((command?: TerminalCommand, success?: boolean) => void) | undefined;
 
     private readonly postCommandListeners: { [key: string]: () => () => void } = {
         'npm-install': () => this.afterNPMInstall
@@ -93,8 +90,6 @@ export class NPMTerminal {
 
         if (changedPackageJson) {
             changedPackageJson = { ...changedPackageJson, filePath: changedPackageJson.filePath };
-    
-            this.checkPackageJsonDifferences(changedPackageJson);
         } else {
             await this.findPackageJsons();
         }
@@ -108,37 +103,6 @@ export class NPMTerminal {
         this._packageJson$.next(null)
     }
 
-    private checkPackageJsonDifferences = (changedPackageJson: Object) => {
-        if (!this._currentCommand || this._currentCommand.type !== CommandTypes.npmInstall && this._currentCommand.type !== CommandTypes.npmUninstall)
-            return;
-
-        const packageJsonDiff = diff(this._packageJson, changedPackageJson);
-
-        if (!packageJsonDiff)
-            return; // No change.
-
-        const currentCommand = this._currentCommand as PackageInstallationCommand;
-
-        const dependencyType = this.getPackageJsonDependencyField(currentCommand.packageType);
-
-        if (packageJsonDiff[`${dependencyType}__added`])
-            this.completeCommand(); // package.json did not have dependencies before, but does now.
-
-        const dependencies = packageJsonDiff[dependencyType];
-
-        // No change in dependencies, so no package (un)installed.
-        if (!dependencies)
-            return;
-
-        if (this._currentCommand.type === CommandTypes.npmInstall && dependencies[`${currentCommand.packageName}__added`] || dependencies[currentCommand.packageName]) {
-            // Package was installed (as new or updated/downgraded version).
-            this.completeCommand();
-        } else if (this._currentCommand.type === CommandTypes.npmUninstall && dependencies[`${currentCommand.packageName}__deleted`]) {
-            // Package was uninstalled.
-            this.completeCommand();
-        }
-    }
-
     private getPackageJsonDependencyField(packageType: PackageType) {
         switch (packageType) {
             case PackageType.Dependency: return "dependencies";
@@ -150,7 +114,16 @@ export class NPMTerminal {
 
     private loadPackageJson(filePath: string) {
         return new Promise<PackageJson>((resolve, reject) => {
-            readPackageJson(filePath, false, (error, data: PackageJson) => {
+            let _readPackageJson;
+
+            // Fix for difference in commonjs module (production) and es6 module (debug)
+            if (readPackageJson.default) {
+                _readPackageJson = readPackageJson.default;
+            } else {
+                _readPackageJson = readPackageJson;
+            }
+
+            _readPackageJson(filePath, false, (error, data: PackageJson) => {
                 // TODO: Test error handling
                 if (error)
                     reject(error);
@@ -173,48 +146,12 @@ export class NPMTerminal {
         }
     }
 
-    /**
-     * Gets the singleton instance of the NPM terminal.
-     */
-    private getTerminal = (): vscode.Terminal => {
-        if (!this._terminal) {
-            this._terminal = vscode.window.createTerminal({
-                name: 'Install package',
-                // TODO: Handle case where there is no package.json file in the workspace
-                cwd: this._packageJson!.filePath.replace(/package\.json$/, '')
-            });
-
-            vscode.window.onDidWriteTerminalData(this.onTerminalData);
-        }
-
-        return this._terminal;
-    }
-
-    private onTerminalData = (event: vscode.TerminalDataWriteEvent) => {
-        if (/\nupdated \d* package/.test(event.data) && this._currentCommand && this._currentCommand.type === CommandTypes.npmInstall) {
-            this.completeCommand();
-        }
-    }
-
-    /**
-     * Disposes of the current NPM terminal (if it exists) and returns a new NPM terminal.
-     */
-    private refreshTerminal = (): vscode.Terminal => {
-        if (this._terminal) {
-            this._terminal.dispose();
-            this._terminal = null;
-        }
-
-        return this.getTerminal();
-    }
-
-
-    private completeCommand = async () => {
+    private completeCommand = async (success: boolean) => {
         if (this.postCommandListeners[this._currentCommand!.type])
             this.postCommandListeners[this._currentCommand!.type]()();
 
         if (this.onCommandComplete)
-            this.onCommandComplete(this._currentCommand);
+            this.onCommandComplete(this._currentCommand, success);
 
         this._currentCommand = null;
     }
@@ -240,10 +177,24 @@ export class NPMTerminal {
      * @param command TerminalCommand to run.
      */
     runCommand = (command: TerminalCommand) => {
-        const terminal = this.refreshTerminal();
+        const task = new vscode.Task(
+            { type: 'npm', task: command.type },
+            vscode.TaskScope.Workspace,
+            command.type,
+            'npm',
+            new vscode.ShellExecution(command.command, { cwd: this._packageJson!.filePath.replace(/package\.json$/, '') })
+        );
 
-        terminal.show();
-        terminal.sendText(command.command, true);
+        vscode.tasks.onDidEndTaskProcess((event) => {
+            if (event.execution.task === task && event.exitCode !== 0) {
+                this.completeCommand(false);
+            } else {
+                this.completeCommand(true);
+            }
+        });
+
+        vscode.tasks.executeTask(task);
+
         this._currentCommand = command;
     }
 

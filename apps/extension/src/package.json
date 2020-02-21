@@ -1,9 +1,16 @@
 {
 	"name": "npm-browser",
 	"displayName": "NPM Browser",
-	"description": "",
+	"description": "Easily search, install and keep track of NPM packages from within Visual Studio Code.",
 	"publisher": "dennisvhest",
-	"repository": "https://github.com/DennisvHest/vscode-npm-browser",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/DennisvHest/vscode-npm-browser"
+	},
+	"homepage": "https://github.com/DennisvHest/vscode-npm-browser",
+	"bugs": {
+		"url": "https://github.com/DennisvHest/vscode-npm-browser/issues"
+	},
 	"version": "1.0.0-beta",
 	"engines": {
 		"vscode": "^1.30.0"
@@ -11,11 +18,22 @@
 	"categories": [
 		"Other"
 	],
+	"keywords": [
+		"npm",
+		"browser",
+		"ui",
+		"install",
+		"package"
+	],
+	"icon": "icon.png",
+	"galleryBanner": {
+		"color": "#1e1e1e",
+		"theme": "dark"
+	},
 	"activationEvents": [
 		"onView:dependencies"
 	],
-	"main": "./apps/extension/src/main.js",
-	"enableProposedApi": true,
+	"main": "./bundle.js",
 	"contributes": {
 		"viewsContainers": {
 			"activitybar": [
@@ -34,5 +52,10 @@
 				}
 			]
 		}
+	},
+	"devDependencies": {
+		"@rollup/plugin-commonjs": "^11.0.2",
+		"@rollup/plugin-json": "^4.0.2",
+		"@rollup/plugin-node-resolve": "^7.1.1"
 	}
 }
