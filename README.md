@@ -12,7 +12,7 @@ The NPM Browser is an easy way to search, install and keep track of your NPM pac
 
 - Browse packages
 - Install/uninstall packages
-- Upgrade/downgrade packages to a new version
+- Upgrade/downgrade packages to a different version
 - See installed packages
 - Manage multiple package.json files within the workspace
 

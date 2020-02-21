@@ -1,3 +1,4 @@
-- VSCode package.json needs all required dependencies from root package.json, otherwise node_modules will not be included in the packaged output.
-- VSCode package.json needs to be located in the root of the dist folder with the main pointing to ./apps/extension/src/main.js
-- node_modules needs to be copied to dist folder
+- Extension tsconfig module needs to be set to ES6
+- Use rollup to package the javascript to one bundle.js file
+- VSCode package.json needs to be located in the root of the dist folder with the main pointing to ./bundle.js
+- Readme, icons and demo need to be copied to dist folder
