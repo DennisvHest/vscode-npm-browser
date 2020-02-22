@@ -8,7 +8,7 @@
   <br>
 </h1>
 
-The NPM Browser is an easy way to search, install and keep track of your NPM packages withing Visual Studio Code.
+The NPM Browser is an easy way to search, install and keep track of your NPM packages within Visual Studio Code.
 
 - Browse packages
 - Install/uninstall packages
