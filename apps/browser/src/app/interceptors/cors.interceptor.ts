@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpEvent } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Injectable()
 export class CorsInterceptor implements HttpInterceptor {
@@ -11,7 +12,15 @@ export class CorsInterceptor implements HttpInterceptor {
             headers: req.headers.set('X-Requested-With', 'XMLHttpRequest')
         });
 
-        return next.handle(newReq);
+        return next.handle(newReq).pipe(
+            catchError(() => {
+                const fallbackReq = newReq.clone({
+                    url: `https://cors-anywhere.herokuapp.com/${req.url}`
+                });
+
+                return next.handle(fallbackReq);
+            })
+        );
     }
 
 }
