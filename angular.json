@@ -63,6 +63,9 @@
             ]
           },
           "configurations": {
+            "development": {
+              "aot": true
+            },
             "production": {
               "fileReplacements": [
                 {
@@ -114,8 +117,13 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": ["apps/browser/tsconfig.app.json"],
-            "exclude": ["**/node_modules/**", "!apps/browser/**"]
+            "tsConfig": [
+              "apps/browser/tsconfig.app.json"
+            ],
+            "exclude": [
+              "**/node_modules/**",
+              "!apps/browser/**"
+            ]
           }
         }
       }
@@ -140,7 +148,9 @@
           },
           "configurations": {
             "production": {
-              "externalDependencies": ["vscode"],
+              "externalDependencies": [
+                "vscode"
+              ],
               "optimization": false,
               "extractLicenses": true,
               "inspect": true,
@@ -162,8 +172,13 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": ["apps/extension/tsconfig.app.json"],
-            "exclude": ["**/node_modules/**", "!apps/extension/**"]
+            "tsConfig": [
+              "apps/extension/tsconfig.app.json"
+            ],
+            "exclude": [
+              "**/node_modules/**",
+              "!apps/extension/**"
+            ]
           }
         }
       }
@@ -177,8 +192,13 @@
         "lint": {
           "builder": "@angular-devkit/build-angular:tslint",
           "options": {
-            "tsConfig": ["libs/shared/tsconfig.lib.json"],
-            "exclude": ["**/node_modules/**", "!libs/shared/**"]
+            "tsConfig": [
+              "libs/shared/tsconfig.lib.json"
+            ],
+            "exclude": [
+              "**/node_modules/**",
+              "!libs/shared/**"
+            ]
           }
         }
       }

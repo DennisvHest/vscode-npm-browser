@@ -12,3 +12,5 @@ interface VSCodeWorkspace {
 }
 
 declare let workspaceState: VSCodeWorkspace;
+
+declare let assetPath: string;

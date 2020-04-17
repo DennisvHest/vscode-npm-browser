@@ -10,6 +10,7 @@ import { NpmInstallCommand, NpmUninstallCommand, InstalledPackage, PackageType }
 import { map } from 'rxjs/operators';
 import * as semver from 'semver';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'npmb-package-detail',
@@ -39,7 +40,7 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
 
   PackageType = PackageType;
 
-  constructor(private store: Store<ApplicationState>, private modalService: NgbModal) { }
+  constructor(private store: Store<ApplicationState>, private modalService: NgbModal, private sanitizer: DomSanitizer) { }
 
   ngOnInit() {
     this.package$ = this.store.pipe(select(getCurrentPackage));
@@ -120,5 +121,13 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.packageSubscription.unsubscribe();
     this.selectedVersionSubscription.unsubscribe();
+  }
+
+  assetUrl(path: string) {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(assetPath + path);
+  }
+
+  get assetPath(): string {
+    return assetPath;
   }
 }

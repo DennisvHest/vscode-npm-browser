@@ -111,7 +111,8 @@ export class BrowserWebView {
                     <npmb-root></npmb-root>
                     <script nonce="${nonce}">
                         const vscode = acquireVsCodeApi();
-                        const workspaceState = ${JSON.stringify(this._context.workspaceState['_value'])}
+                        const workspaceState = ${JSON.stringify(this._context.workspaceState['_value'])};
+                        const assetPath = "${vscode.Uri.file(this._context.extensionPath).with({ scheme: 'vscode-resource' })}/apps/extension/src/browser/assets/";
                     </script>
                     ${scripts.join('')}
                 </body>

@@ -33,7 +33,7 @@
 	"activationEvents": [
 		"onView:dependencies"
 	],
-	"main": "./bundle.js",
+	"main": "./apps/extension/src/main.js",
 	"contributes": {
 		"viewsContainers": {
 			"activitybar": [

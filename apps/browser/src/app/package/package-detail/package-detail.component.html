@@ -5,13 +5,17 @@
         </div>
         <div class="col">
             <h1>{{ npmPackage.name }}</h1>
-            <h6 *ngIf="npmPackage.author">{{ npmPackage.author.name }}</h6>
+            <h6 *ngIf="npmPackage.author" class="d-inline-block">{{ npmPackage.author.name }}</h6>
+            <a id="to-npmjs" href="https://www.npmjs.com/package/{{npmPackage.name}}" [class.ml-4]="npmPackage.author">
+                <span class="badge badge-secondary p-1"><img [src]="assetUrl('npm-logo-white.svg')" class="mr-1" /> View on npmjs.com</span>
+            </a>
             <p id="package-description" [title]="npmPackage.description">{{ npmPackage.description }}</p>
             <form [formGroup]="packageInstallForm" (ngSubmit)="installPackage()">
                 <div class="d-flex">
                     <select formControlName="version" class="form-control">
                         <option *ngFor="let version of npmPackage.versions.reverse()" [ngValue]="version.version">
-                            {{ version.version }}<ng-container *ngIf="version.distTags.length" > ({{ version.distTags.join(', ') }})</ng-container>
+                            {{ version.version }}<ng-container *ngIf="version.distTags.length">
+                                ({{ version.distTags.join(', ') }})</ng-container>
                         </option>
                     </select>
                     <div *ngIf="selectedVersion" class="input-group-append">
@@ -21,25 +25,32 @@
                                 <span class="sr-only">Loading...</span>
                             </div>
                             <ng-container *ngIf="installedVersion$ | async as installedVersion; else installText">
-                                <ng-container *ngIf="selectedVersion | equals:installedVersion.version; then installText"></ng-container>
-                                <ng-container *ngIf="selectedVersion | isGreaterThan:installedVersion.version">Upgrade</ng-container>
-                                <ng-container *ngIf="selectedVersion | isLessThan:installedVersion.version">Downgrade</ng-container>
+                                <ng-container
+                                    *ngIf="selectedVersion | equals:installedVersion.version; then installText">
+                                </ng-container>
+                                <ng-container *ngIf="selectedVersion | isGreaterThan:installedVersion.version">Upgrade
+                                </ng-container>
+                                <ng-container *ngIf="selectedVersion | isLessThan:installedVersion.version">Downgrade
+                                </ng-container>
                             </ng-container>
                             <ng-template #installText>Install</ng-template>
                         </button>
                     </div>
                     <div *ngIf="installedVersion$ | async as installedVersion" class="installed-message">
                         <button type="button" class="btn btn-transparent" (click)="uninstallPackage()"
-                            [class.installing]="uninstallingPackage$ | async" [disabled]="(uninstallingPackage$ | async) || (installingPackage$ | async)">
+                            [class.installing]="uninstallingPackage$ | async"
+                            [disabled]="(uninstallingPackage$ | async) || (installingPackage$ | async)">
                             <div class="spinner-border spinner-border-sm text-light" role="status">
                                 <span class="sr-only">Loading...</span>
                             </div>
                             <fa-icon [icon]="['fas', 'trash']" size="lg"></fa-icon>
                         </button>
-                        <fa-icon [icon]="['fas', 'check-circle']"></fa-icon> 
-                        Installed 
-                        <ng-container *ngIf="installedVersion.type === PackageType.DevDependency">as development dependency </ng-container>
-                        <ng-container *ngIf="installedVersion.type === PackageType.OptionalDependency">as optional dependency </ng-container>
+                        <fa-icon [icon]="['fas', 'check-circle']"></fa-icon>
+                        Installed
+                        <ng-container *ngIf="installedVersion.type === PackageType.DevDependency">as development
+                            dependency </ng-container>
+                        <ng-container *ngIf="installedVersion.type === PackageType.OptionalDependency">as optional
+                            dependency </ng-container>
                         <b class="ml-1">({{ installedVersion.version.raw }})</b>
                     </div>
                 </div>
@@ -47,26 +58,30 @@
                     <div class="modal-body p-4">
                         <h5>Version range</h5>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" formControlName="updateLevel" id="updateLevel0" [value]="0">
+                            <input class="form-check-input" type="radio" formControlName="updateLevel" id="updateLevel0"
+                                [value]="0">
                             <label class="form-check-label" for="updateLevel0">
                                 Exact
                             </label>
                             <span> (--save-exact)</span>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" formControlName="updateLevel" id="updateLevel3" [value]="3">
+                            <input class="form-check-input" type="radio" formControlName="updateLevel" id="updateLevel3"
+                                [value]="3">
                             <label class="form-check-label" for="updateLevel3">
                                 Only patch updates
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" formControlName="updateLevel" id="updateLevel2" [value]="2">
+                            <input class="form-check-input" type="radio" formControlName="updateLevel" id="updateLevel2"
+                                [value]="2">
                             <label class="form-check-label" for="updateLevel2">
                                 Only minor and patch updates
                             </label>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" formControlName="updateLevel" id="updateLevel1" [value]="1">
+                            <input class="form-check-input" type="radio" formControlName="updateLevel" id="updateLevel1"
+                                [value]="1">
                             <label class="form-check-label" for="updateLevel1">
                                 Major, minor and patch updates
                             </label>
@@ -74,21 +89,24 @@
                         <hr />
                         <h5>Dependency type</h5>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" formControlName="packageType" id="dependencyPackageType" [value]="PackageType.Dependency">
+                            <input class="form-check-input" type="radio" formControlName="packageType"
+                                id="dependencyPackageType" [value]="PackageType.Dependency">
                             <label class="form-check-label" for="dependencyPackageType">
                                 Regular dependency
                             </label>
                             <span> (--save-prod)</span>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" formControlName="packageType" id="devDependencyPackageType" [value]="PackageType.DevDependency">
+                            <input class="form-check-input" type="radio" formControlName="packageType"
+                                id="devDependencyPackageType" [value]="PackageType.DevDependency">
                             <label class="form-check-label" for="devDependencyPackageType">
                                 Development dependency
                             </label>
                             <span> (--save-dev)</span>
                         </div>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" formControlName="packageType" id="optionalDependencyPackageType" [value]="PackageType.OptionalDependency">
+                            <input class="form-check-input" type="radio" formControlName="packageType"
+                                id="optionalDependencyPackageType" [value]="PackageType.OptionalDependency">
                             <label class="form-check-label" for="optionalDependencyPackageType">
                                 Optional dependency
                             </label>

@@ -8,8 +8,8 @@ export class DependencyTreeItem extends TreeItem {
         super(`${name} (${version})`);
 
         this.iconPath = {
-            light: vscode.Uri.file(path.join(context.extensionPath, '/apps/extension/assets', 'dependency-light.svg')),
-            dark: vscode.Uri.file(path.join(context.extensionPath, '/apps/extension/assets', 'dependency-dark.svg'))
+            light: vscode.Uri.file(path.join(context.extensionPath, '/apps/extension/src/assets', 'dependency-light.svg')),
+            dark: vscode.Uri.file(path.join(context.extensionPath, '/apps/extension/src/assets', 'dependency-dark.svg'))
         };
     }
 }

@@ -23,13 +23,43 @@ npmb-package-detail .tab-content {
     right: 0;
 }
 
+body.vscode-light {
+    #to-npmjs {
+        img {
+            filter: brightness(0);
+        }
+    }
+}
+
+body.vscode-dark {
+    #to-npmjs {
+        img {
+            filter: brightness(1);
+        }
+    }
+}
+
+body.vscode-high-contrast {
+    #to-npmjs {
+        img {
+            filter: brightness(1);
+        }
+    }
+}
+
 /* Bootstrap overrides */
 .list-group-item {
     background-color: transparent;
     color: var(--vscode-editor-foreground);
 
-    h1, h2, h3, h4, h5, h6, p {
-        color:  var(--vscode-editor-foreground);
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    p {
+        color: var(--vscode-editor-foreground);
     }
 
     h5 {
@@ -125,8 +155,11 @@ hr {
         font-weight: bold;
         font-size: 16px;
 
-        &, &.active {
-            &, &:hover {
+        &,
+        &.active {
+
+            &,
+            &:hover {
                 background-color: transparent;
                 border-color: transparent;
             }
@@ -148,7 +181,8 @@ ngb-pagination .pagination {
     margin: 0;
     display: flex;
 
-    .page-item, .page-item.disabled {
+    .page-item,
+    .page-item.disabled {
         &.active {
             .btn-primary();
         }
@@ -167,9 +201,23 @@ ngb-pagination .pagination {
     }
 }
 
+.badge {
+    color: var(--vscode-editor-foreground);
+}
+
+.badge.badge-secondary {
+    background-color: var(--vscode-titleBar-activeBackground);
+}
+
 /* Markdown overrides */
 markdown {
-    h1, h2, h3, h4, h5, h6 {
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
         font-weight: normal;
     }
 }
@@ -183,7 +231,13 @@ code[class*="language-"],
 pre[class*="language-"] {
     color: var(--vscode-editor-foreground);
 
-    .token.punctuation, .token.operator, .token.entity, .token.url, .language-css .token.string, .style .token.string, .token.variable {
+    .token.punctuation,
+    .token.operator,
+    .token.entity,
+    .token.url,
+    .language-css .token.string,
+    .style .token.string,
+    .token.variable {
         color: var(--vscode-editor-foreground);
     }
 }

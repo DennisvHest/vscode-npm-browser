@@ -12,12 +12,12 @@
 <body>
   <npmb-root></npmb-root>
   <script>
-    var vscode = {
+    const vscode = {
       postMessage: message => { },
       getState: () => null,
       setState: state => { }
     };
-    var workspaceState = {
+    const workspaceState = {
       "selectedPackageJson": {
         "dependencies": {
           "less": "1.0.0"
@@ -35,6 +35,7 @@
         // { "name": "npm-browser", "displayName": "NPM Browser", "description": "", "version": "0.5.0", "engines": { "vscode": "^1.37.0" }, "categories": ["Other"], "activationEvents": ["onCommand:npmBrowser.open"], "main": "../../dist/out-tsc/main.js", "contributes": { "commands": [{ "command": "npmBrowser.open", "title": "Open NPM Browser" }] }, "scripts": { "vscode:prepublish": "npm run compile", "compile": "tsc -p ./", "watch": "tsc -watch -p ./", "pretest": "npm run compile", "test": "node ./out/test/runTest.js" }, "devDependencies": { "@types/glob": "^7.1.1", "@types/mocha": "^5.2.6", "@types/node": "^10.12.21", "@types/vscode": "^1.37.0", "glob": "^7.1.4", "mocha": "^6.1.4", "typescript": "^3.3.1", "tslint": "^5.12.1", "vscode-test": "^1.0.2" }, "readme": "ERROR: No README data found!", "_id": "npm-browser@0.5.0", "filePath": "c:\\dev\\NPM Browser_old\\browser\\dist\\apps\\extension\\package.json" }
       ]
     };
+    const assetPath = "/assets/";
   </script>
 </body>
 
