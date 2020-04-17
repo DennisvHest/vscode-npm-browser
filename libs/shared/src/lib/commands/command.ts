@@ -14,4 +14,6 @@ export class CommandTypes {
     static readonly packageJsonsUpdated = 'package-jsons-updated';
 
     static readonly vsCodeToastCommand = 'vscode-toast-command';
+
+    static readonly installedPackageSelected = 'installed-package-selected';
 }

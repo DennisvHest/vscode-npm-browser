@@ -186,9 +186,9 @@ export class NPMTerminal {
         );
 
         vscode.tasks.onDidEndTaskProcess((event) => {
-            if (event.execution.task === task && event.exitCode !== 0) {
+            if (event.execution.task.name === task.name && event.exitCode !== 0) {
                 this.completeCommand(false);
-            } else {
+            } else if (this._currentCommand) {
                 this.completeCommand(true);
             }
         });

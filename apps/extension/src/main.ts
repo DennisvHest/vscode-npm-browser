@@ -7,6 +7,7 @@ import { Subscription } from 'rxjs';
 
 let packageJsonSubscription: Subscription;
 let packageJsonsSubscription: Subscription;
+let openPackageDetailCommandRegistration: vscode.Disposable;
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -18,16 +19,12 @@ export function activate(context: vscode.ExtensionContext) {
 	if (selectedPackageJson)
 		npmTerminal.setPackageJson(selectedPackageJson);
 
-	const treeView = vscode.window.createTreeView("dependencies", {
-		treeDataProvider: new DependencyTreeDataProvider(npmTerminal.packageJson, context)
-	});
-
-	treeView.onDidChangeVisibility(async (event) => {
-		if (!event.visible)
-			return;
-
-		if (!browser || !browser.isOpen)
+	function reinitializeBrowser() {
+		if (!browser || !browser.isOpen) {
 			browser = new BrowserWebView(context, false);
+		} else {
+			browser.setActivePanel();
+		}
 
 		browser.onTerminalCommand = npmTerminal.runCommand;
 		browser.onValueCommand = onValueCommand;
@@ -46,6 +43,24 @@ export function activate(context: vscode.ExtensionContext) {
 
 		npmTerminal.findPackageJsons();
 		npmTerminal.reloadPackageJson();
+	}
+
+	openPackageDetailCommandRegistration = vscode.commands.registerCommand('npm-browser.open-package-detail', (packageName: string) => {
+		reinitializeBrowser();
+
+		const command: ValueCommand = { type: CommandTypes.installedPackageSelected, value: packageName };
+		browser.sendCommand(command);
+	});
+
+	const treeView = vscode.window.createTreeView("dependencies", {
+		treeDataProvider: new DependencyTreeDataProvider(npmTerminal.packageJson, context)
+	});
+
+	treeView.onDidChangeVisibility(async (event) => {
+		if (!event.visible)
+			return;
+
+		reinitializeBrowser();
 	});
 
 	function onValueCommand(command: ValueCommand) {
@@ -88,5 +103,7 @@ export function deactivate() {
 
 	if (packageJsonsSubscription)
 		packageJsonsSubscription.unsubscribe();
+
+	openPackageDetailCommandRegistration.dispose();
 }
 

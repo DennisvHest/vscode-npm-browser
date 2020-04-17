@@ -73,6 +73,11 @@ export class BrowserWebView {
         this._panel.webview.postMessage(command);
     }
 
+    setActivePanel() {
+        if (this._panel)
+            this._panel.reveal(vscode.ViewColumn.Active);
+    }
+
     private getAssetUri(...paths: string[]): vscode.Uri {
         return vscode.Uri.file(path.join(this._context.extensionPath, 'apps\\extension\\src\\browser', ...paths));
     }
