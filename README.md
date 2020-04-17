@@ -17,5 +17,3 @@ The NPM Browser is an easy way to search, install and keep track of your NPM pac
 - Manage multiple package.json files within the workspace
 
 ![](demo.gif)
-
-Currently in a beta stage. Please report any bugs at the [GitHub repository](https://github.com/DennisvHest/vscode-npm-browser/issues).

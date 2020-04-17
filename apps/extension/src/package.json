@@ -11,7 +11,7 @@
 	"bugs": {
 		"url": "https://github.com/DennisvHest/vscode-npm-browser/issues"
 	},
-	"version": "1.0.0-beta",
+	"version": "1.0.1",
 	"engines": {
 		"vscode": "^1.30.0"
 	},
@@ -40,7 +40,7 @@
 				{
 					"id": "npm-browser",
 					"title": "NPM Browser",
-					"icon": "./apps/extension/assets/icon.svg"
+					"icon": "./apps/extension/src/assets/icon.svg"
 				}
 			]
 		},
