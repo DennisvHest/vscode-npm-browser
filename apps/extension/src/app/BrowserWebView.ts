@@ -83,7 +83,7 @@ export class BrowserWebView {
     }
 
     private getAssetResourceUri(...paths: string[]): vscode.Uri {
-        return this.getAssetUri(...paths).with({ scheme: 'vscode-resource' });
+        return this._panel.webview.asWebviewUri(this.getAssetUri(...paths));
     }
 
     /**
@@ -117,7 +117,7 @@ export class BrowserWebView {
                     <script nonce="${nonce}">
                         const vscode = acquireVsCodeApi();
                         const workspaceState = ${JSON.stringify(this._context.workspaceState['_value'])};
-                        const assetPath = "${vscode.Uri.file(this._context.extensionPath).with({ scheme: 'vscode-resource' })}/apps/extension/src/browser/assets/";
+                        const assetPath = "${this._panel.webview.asWebviewUri(vscode.Uri.file(this._context.extensionPath))}/apps/extension/src/browser/assets/";
                     </script>
                     ${scripts.join('')}
                 </body>
@@ -126,11 +126,11 @@ export class BrowserWebView {
 
     private getContentSecurityPolicies(nonce: string): string[] {
         return [
-            'default-src vscode-resource:',
+            `default-src ${this._panel.webview.cspSource}`,
             `script-src 'nonce-${nonce}'`,
-            'style-src vscode-resource: \'unsafe-inline\'',
+            `style-src ${this._panel.webview.cspSource} \'unsafe-inline\'`,
             'font-src https:',
-            'img-src vscode-resource: https: http:',
+            `img-src ${this._panel.webview.cspSource} https: http:`,
             'connect-src https:'
         ];
     }
