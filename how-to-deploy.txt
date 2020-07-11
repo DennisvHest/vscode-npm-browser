@@ -1,5 +1,6 @@
-- Extension tsconfig module needs to be set to ES6
-- Use rollup to package the javascript to one bundle.js file (rollup -c)
+- Extension tsconfig.app module needs to be set to ES6
 - Make sure npm install is run once so that rollup has the required extensions
+- Use rollup to package the javascript to one bundle.js file (rollup -c)
 - VSCode package.json needs to be located in the root of the dist folder with the main pointing to ./bundle.js
 - Readme, icons and demo need to be copied to dist folder
+- vsce package runnen

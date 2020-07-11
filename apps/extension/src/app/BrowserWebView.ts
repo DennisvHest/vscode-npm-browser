@@ -79,7 +79,7 @@ export class BrowserWebView {
     }
 
     private getAssetUri(...paths: string[]): vscode.Uri {
-        return vscode.Uri.file(path.join(this._context.extensionPath, 'apps\\extension\\src\\browser', ...paths));
+        return vscode.Uri.file(path.join(this._context.extensionPath, 'apps', 'extension', 'src', 'browser', ...paths));
     }
 
     private getAssetResourceUri(...paths: string[]): vscode.Uri {
