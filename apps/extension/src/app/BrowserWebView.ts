@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { TerminalCommand, Command, ValueCommand, VSCodeToastCommand } from '../../../../libs/shared/src/index';
+import { TerminalCommand, Command, ValueCommand, VSCodeToastCommand, ResolvePrivatePackageCommand } from '../../../../libs/shared/src/index';
 
 export class BrowserWebView {
 
@@ -12,12 +12,14 @@ export class BrowserWebView {
     onTerminalCommand: ((command: TerminalCommand) => void) | undefined;
     onValueCommand: ((command: ValueCommand) => void) | undefined;
     onVSCodeToastCommand: ((command: VSCodeToastCommand) => void) | undefined;
+    onResolvePackageCommand: ((command: ResolvePrivatePackageCommand) => void) | undefined;
 
     private readonly commandListeners: { [key: string]: () => any } = {
         'npm-install': () => this.onTerminalCommand,
         'npm-uninstall': () => this.onTerminalCommand,
         'package-json-selected': () => this.onValueCommand,
-        'vscode-toast-command': () => this.onVSCodeToastCommand
+        'vscode-toast-command': () => this.onVSCodeToastCommand,
+        'resolve-private-package-command': () => this.onResolvePackageCommand
     };
 
     private readonly baseScripts = [
@@ -93,21 +95,25 @@ export class BrowserWebView {
      */
     private getWebviewContent(production: boolean): string {
         const nonce = this.getNonce();
+        console.log('nonec')
 
         const contentSecurityPolicies = this.getContentSecurityPolicies(nonce);
         let scripts = this.baseScripts;
+        console.log('ran')
 
         if (!production)
             scripts = scripts.concat(this.devScripts);
 
         scripts = scripts.map(script => `<script nonce="${nonce}" src="${this.getAssetResourceUri(script)}" defer></script>`);
 
+        console.log('ran', scripts)
+
         return `<!doctype html>
                 <html lang="en">
                 <head>
                     <meta charset="utf-8">
                     <title>NpmBrowser</title>
-                    <meta http-equiv="Content-Security-Policy" content="${contentSecurityPolicies.join(';')}">
+                    <!-- TODO add back CSP <meta http-equiv="Content-Security-Policy" content="${contentSecurityPolicies.join(';')}"> -->
                     <meta name="viewport" content="width=device-width, initial-scale=1">
                     <link rel="icon" type="image/x-icon" href="favicon.ico">
                     ${production ? `<link rel="stylesheet" href="${this.getAssetResourceUri('styles.css')}">` : ''}

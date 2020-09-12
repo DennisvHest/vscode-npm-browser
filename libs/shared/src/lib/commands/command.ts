@@ -16,4 +16,6 @@ export class CommandTypes {
     static readonly vsCodeToastCommand = 'vscode-toast-command';
 
     static readonly installedPackageSelected = 'installed-package-selected';
+
+    static readonly replyPrivatePackageResult = 'reply-private-package-result'
 }

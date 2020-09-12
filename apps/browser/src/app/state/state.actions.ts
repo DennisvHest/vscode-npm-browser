@@ -19,6 +19,11 @@ export const selectedPackageChanged = createAction(
     props<{ value: string }>()
 );
 
+export const replyPrivatePackageResult = createAction(
+    '[Search] Private package resolved',
+    props<{ requestId: string, value: Package }>()
+);
+
 export const currentPackageLoaded = createAction(
     '[Search] Package loaded.',
     props<{ value: Package }>()

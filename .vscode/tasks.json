@@ -1,46 +1,35 @@
 // See https://go.microsoft.com/fwlink/?LinkId=733558
 // for the documentation about the tasks.json format
 {
-    "version": "2.0.0",
-    "tasks": [
-        {
-            "label": "build-extension-src",
-            "command": "npm",
-            "type": "shell",
-            "args": [
-                "run",
-                "build-extension"
-            ],
-        },
-        {
-            "label": "copy-package-json",
-            "command": "xcopy",
-            "type": "shell",
-            "args": [
-                "\"apps\\extension\\src\\package.json\"",
-                "\"dist\\package.json*\"",
-                "/y",
-            ],
-        },
-        {
-            "label": "copy-assets",
-            "command": "xcopy",
-            "type": "shell",
-            "args": [
-                "\"apps\\extension\\src\\assets\\*\"",
-                "\"dist\\apps\\extension\\src\\assets\"",
-                "/y",
-                "/i",
-                "/s",
-            ],
-        },
-        {
-            "label": "build-extension",
-            "dependsOn": [
-                "build-extension-src",
-                "copy-package-json",
-                "copy-assets"
-            ]
-        }
-    ]
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-extension-src",
+      "command": "npm",
+      "type": "shell",
+      "args": ["run", "build-extension"]
+    },
+    {
+      "label": "copy-package-json",
+      "command": "npm",
+      "type": "shell",
+      "args": [
+       "run", 
+       "dist:copy-package"
+      ]
+    },
+    {
+      "label": "copy-assets",
+      "command": "npm",
+      "type": "shell",
+      "args": [
+       "run", 
+       "dist:copy-assets"
+      ]
+    },
+    {
+      "label": "build-extension",
+      "dependsOn": ["build-extension-src", "copy-package-json", "copy-assets"]
+    }
+  ]
 }

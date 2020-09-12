@@ -1,9 +1,13 @@
 import * as vscode from 'vscode';
 import { BrowserWebView } from './app/BrowserWebView';
 import { NPMTerminal } from './app/NPMTerminal';
-import { CommandTypes, ToastLevels, ValueCommand, VSCodeToastCommand, PackageJson } from '../../../libs/shared/src';
+import { CommandTypes, ToastLevels, ValueCommand, VSCodeToastCommand, PackageJson, ResolvePrivatePackageCommand } from '../../../libs/shared/src';
 import { DependencyTreeDataProvider } from './app/DependencyTreeDataProvider';
 import { Subscription } from 'rxjs';
+import { take} from 'rxjs/operators'
+import * as path from 'path'
+import * as cp from 'child_process'
+import * as util from 'util'
 
 let packageJsonSubscription: Subscription;
 let packageJsonsSubscription: Subscription;
@@ -29,6 +33,7 @@ export function activate(context: vscode.ExtensionContext) {
 		browser.onTerminalCommand = npmTerminal.runCommand;
 		browser.onValueCommand = onValueCommand;
 		browser.onVSCodeToastCommand = onVSCodeToastCommand;
+		browser.onResolvePackageCommand = onResolvePackageCommand 
 
 		npmTerminal.onCommandComplete = (command, success) => {
 			if (command.type === CommandTypes.npmInstall)
@@ -41,9 +46,15 @@ export function activate(context: vscode.ExtensionContext) {
 				vscode.window.showErrorMessage("Something went wrong executing an NPM command. See the terminal window for details.")
 		}
 
-		npmTerminal.findPackageJsons();
+		npmTerminal.findPackageJsons().then(res => {
+			if (res.length === 1 && (npmTerminal.packageJson as any).value == null) {
+				npmTerminal.setPackageJson(res[0])
+			}
+		});
 		npmTerminal.reloadPackageJson();
 	}
+
+	
 
 	openPackageDetailCommandRegistration = vscode.commands.registerCommand('npm-browser.open-package-detail', (packageName: string) => {
 		reinitializeBrowser();
@@ -65,6 +76,42 @@ export function activate(context: vscode.ExtensionContext) {
 
 	function onValueCommand(command: ValueCommand) {
 		npmTerminal.setPackageJson(command.value);
+	}
+
+	async function onResolvePackageCommand (command: ResolvePrivatePackageCommand) {
+		const projectPackageJSON = await npmTerminal.packageJson.pipe(take(1)).toPromise()
+
+		let packageJSON
+
+		try {
+			const result = await util.promisify(cp.exec)(`npm view ${JSON.stringify(command.packageId)} --json`, { cwd: path.dirname(projectPackageJSON.filePath) })
+			packageJSON = JSON.parse(result.stdout)
+		} catch(e) {
+			console.error(`failed to resolve private package ${command.packageId}`)
+			return
+		}
+
+		if (packageJSON && packageJSON.name != null) {
+			const distTags = packageJSON['dist-tags']
+
+			const packageValue = {
+				name: packageJSON.name,
+				description: packageJSON.description,
+				readme: "", 
+				distTags: distTags,
+				versions: 
+					packageJSON.versions
+						.map(version => ({ 
+							version, 
+							distTags: Object.entries(distTags)
+								.filter(([, tagVersion]) => version === tagVersion)
+								.map(([tag])=> tag) 
+						})),
+				author: packageJSON['author'] ? packageJSON['author'] : null
+			}
+
+			browser.sendCommand({ type: CommandTypes.replyPrivatePackageResult, requestId: command.requestId, value: packageValue } as any)
+		}
 	}
 
 	function onVSCodeToastCommand(command: VSCodeToastCommand) {

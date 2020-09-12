@@ -77,6 +77,8 @@ export class NPMTerminal {
         const packageJsons = (await Promise.all(readPackageJsonFiles)).filter(f => f !== null);
 
         this._packageJsons$.next(packageJsons);
+
+        return packageJsons
     }
 
     private onPackageJsonFileChanged = async (packageJsonUri) => {

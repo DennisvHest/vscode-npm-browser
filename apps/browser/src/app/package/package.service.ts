@@ -3,12 +3,13 @@ import { PackageSearchResult } from '../model/package-search-result.model';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Package } from '../model/package.model';
-import { map, tap, catchError } from 'rxjs/operators';
+import { map, tap, catchError, filter, timeout } from 'rxjs/operators';
 import { ApplicationState } from '../state';
 import { Store } from '@ngrx/store';
-import { packageSearchResultChanged, packageSearchQueryChanged } from '../state/state.actions';
+import { Actions, ofType } from '@ngrx/effects';
+import { packageSearchResultChanged, replyPrivatePackageResult, packageSearchQueryChanged } from '../state/state.actions';
 import { VSCodeService } from '../vscode/vscode.service';
-import { VSCodeToastCommand, ToastLevels } from 'libs/shared/src';
+import { VSCodeToastCommand, ResolvePrivatePackageCommand, ToastLevels } from 'libs/shared/src';
 
 @Injectable({
   providedIn: 'root'
@@ -18,7 +19,7 @@ export class PackageService {
   private readonly baseUrl = 'https://registry.npmjs.org';
   private readonly pageSize = 20;
 
-  constructor(private http: HttpClient, private store: Store<ApplicationState>, private vsCodeService: VSCodeService) { }
+  constructor(private http: HttpClient, private store: Store<ApplicationState>, private actions$: Actions,  private vsCodeService: VSCodeService) { }
 
   search(query: PackageSearchQuery): Observable<PackageSearchResult> {
     this.store.dispatch(packageSearchQueryChanged({ value: query }));
@@ -39,6 +40,20 @@ export class PackageService {
         return of(null);
       })
     );
+  }
+
+  tryResolvePrivatePackage(packageId: string): Observable<Package> {
+    // TODO better way to generate uid?
+    const id = String(Math.floor(Math.random() * 10000000000000))
+
+    this.vsCodeService.postCommand(new ResolvePrivatePackageCommand(id, packageId)) 
+
+    return this.actions$.pipe(ofType(replyPrivatePackageResult)).pipe(
+      filter((event) => event.requestId === id), 
+      // VScode will never reply in the browser 
+      timeout(5000),
+      map((event) => event.value),
+    )
   }
 
   getPackage(name: string): Observable<Package> {
@@ -64,9 +79,10 @@ export class PackageService {
         return npmPackage as Package;
       }),
       catchError(error =>  {
-        this.reportRequestError(error);
-
-        return of(null);
+        return this.tryResolvePrivatePackage(name).pipe(catchError(() => {
+          this.reportRequestError(error);
+          return of(null)
+        }))
       })
     );
   }

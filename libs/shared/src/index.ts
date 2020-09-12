@@ -4,6 +4,7 @@ export * from './lib/commands/npm-install-command';
 export * from './lib/commands/npm-uninstall-command';
 export * from './lib/commands/value-command';
 export * from './lib/commands/vscode-toast-command';
+export * from './lib/commands/resolve-private-package-command';
 export * from './lib/package-json';
 export * from './lib/package-type';
 export * from './lib/installed-package';
