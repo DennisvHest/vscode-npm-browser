@@ -4,6 +4,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 
 import * as fs from "fs";
 import * as readPackageJson from 'read-package-json';
+import * as util from 'util'
+import * as cp from 'child_process'
 
 export class NPMTerminal {
 
@@ -42,6 +44,10 @@ export class NPMTerminal {
 
     get packageJsons(): Observable<PackageJson[]> {
         return this._packageJsons$;
+    }
+
+    private get packageJsonPath(): string {
+        return this._packageJson!.filePath.replace(/package\.json$/, '');
     }
 
     setPackageJson = (packageJson: PackageJson) => {
@@ -177,12 +183,22 @@ export class NPMTerminal {
      * @param command TerminalCommand to run.
      */
     runCommand = (command: TerminalCommand) => {
+        this._currentCommand = command;
+
+        if (command.runAsVSCodeTask) {
+            this.runCommandAsVSCodeTask(command);
+        } else {
+            this.runCommandAsChildProcess(command);
+        }
+    }
+
+    runCommandAsVSCodeTask = (command: TerminalCommand) => {
         const task = new vscode.Task(
             { type: 'npm', task: command.type },
             vscode.TaskScope.Workspace,
             command.type,
             'npm',
-            new vscode.ShellExecution(command.command, { cwd: this._packageJson!.filePath.replace(/package\.json$/, '') })
+            new vscode.ShellExecution(command.command, { cwd: this.packageJsonPath })
         );
 
         vscode.tasks.onDidEndTaskProcess((event) => {
@@ -194,8 +210,20 @@ export class NPMTerminal {
         });
 
         vscode.tasks.executeTask(task);
+    }
 
-        this._currentCommand = command;
+    runCommandAsChildProcess = async (command: TerminalCommand) => {
+        let packageInfo;
+
+        try {
+			const result = await util.promisify(cp.exec)(command.command, { cwd: this.packageJsonPath });
+			packageInfo = JSON.parse(result.stdout);
+		} catch(e) {
+			console.error(`failed to execute command ${command.command}`);
+			return;
+        }
+        
+        //console.log(packageInfo);
     }
 
 }

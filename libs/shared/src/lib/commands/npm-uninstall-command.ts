@@ -4,12 +4,14 @@ import { PackageType } from '../package-type';
 export class NpmUninstallCommand implements PackageInstallationCommand {
     type = 'npm-uninstall';
 
+    runAsVSCodeTask: boolean;
     command: string;
 
     constructor(
         public packageName: string,
         public packageType: PackageType
     ) {
+        this.runAsVSCodeTask = true;
         let dependencyTypeFlag: string;
 
         const optionFlags: string[] = [];

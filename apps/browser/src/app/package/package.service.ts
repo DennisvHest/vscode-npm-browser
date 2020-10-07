@@ -8,7 +8,7 @@ import { ApplicationState } from '../state';
 import { Store } from '@ngrx/store';
 import { packageSearchResultChanged, packageSearchQueryChanged } from '../state/state.actions';
 import { VSCodeService } from '../vscode/vscode.service';
-import { VSCodeToastCommand, ToastLevels } from 'libs/shared/src';
+import { VSCodeToastCommand, ToastLevels, TerminalCommand, CommandTypes } from 'libs/shared/src';
 
 @Injectable({
   providedIn: 'root'
@@ -42,6 +42,8 @@ export class PackageService {
   }
 
   getPackage(name: string): Observable<Package> {
+    this.vsCodeService.postCommand({ command: `npm view ${name} --json`, type: CommandTypes.fetchPackage } as TerminalCommand);
+
     return this.http.get<Package>(`${this.baseUrl}/${name}`).pipe(
       map((npmPackage: any) => {
         npmPackage.distTags = npmPackage['dist-tags'];
@@ -72,6 +74,6 @@ export class PackageService {
   }
 
   private reportRequestError(error) {
-    this.vsCodeService.postCommand(new VSCodeToastCommand(`Request to NPM Registry failed (HTTP Status: ${error.status}).`, ToastLevels.error))
+    this.vsCodeService.postCommand(new VSCodeToastCommand(`Request to NPM Registry failed (HTTP Status: ${error.status}).`, ToastLevels.error));
   }
 }

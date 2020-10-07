@@ -6,12 +6,14 @@ import { PackageInstallationCommand } from './package-installation-command';
 export class NpmInstallCommand implements PackageInstallationCommand {
     type = 'npm-install';
 
+    runAsVSCodeTask: boolean;
     command: string;
     packageName: string;
     versionRange: string;
     packageType: PackageType;
 
     constructor(options: NpmInstallOptions) {
+        this.runAsVSCodeTask = true;
         this.packageName = options.packageName;
         this.packageType = options.packageType;
         this.versionRange = applyRangeOptions(options.packageVersion, options.updateLevel).raw;
