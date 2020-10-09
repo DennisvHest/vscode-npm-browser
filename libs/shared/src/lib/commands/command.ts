@@ -8,6 +8,7 @@ export class CommandTypes {
     static readonly npmUninstallComplete = 'npm-uninstall-complete';
     static readonly npmUninstall = 'npm-uninstall';
     static readonly fetchPackage = 'fetch-package';
+    static readonly fetchPackageComplete = 'fetch-package-complete';
     
     static readonly packageJsonSelected = 'package-json-selected';
     static readonly packageJsonUpdated = 'package-json-updated';

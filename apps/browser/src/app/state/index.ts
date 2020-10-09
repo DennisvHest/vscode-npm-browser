@@ -1,5 +1,5 @@
 import { ActionReducerMap, createReducer, on } from '@ngrx/store';
-import { packageSearchResultChanged, selectedPackageChanged, currentPackageLoaded, installPackage, installPackageComplete, packageJsonSelected, packageJsonUpdated, uninstallPackage, uninstallPackageComplete, packageSearchQueryChanged, packageJsonsUpdated } from './state.actions';
+import { packageSearchResultChanged, selectedPackageChanged, currentPackageLoaded, installPackage, installPackageComplete, packageJsonSelected, packageJsonUpdated, uninstallPackage, uninstallPackageComplete, packageSearchQueryChanged, packageJsonsUpdated, packageFetched } from './state.actions';
 import { PackageSearchResult } from '../model/package-search-result.model';
 import { Package } from '../model/package.model';
 
@@ -8,6 +8,7 @@ export interface ApplicationState {
     packageSearchResult: PackageSearchResult;
     selectedPackageName: string | null;
     loadedPackage: Package;
+    fetchedPackage: any;
     installingPackage: boolean;
     uninstallingPackage: boolean;
     vscodeWorkspace: VSCodeWorkspace;
@@ -62,6 +63,17 @@ export function selectedPackageIdReducer(state, action) {
     )(state, action);
 }
 
+export function fetchedPackageReducer(state, action) {
+    return createReducer(null,
+        on(packageFetched, (currentState, { value }) => {
+            if (!currentState)
+                return value;
+
+            return { ...currentState, ...value };
+        })
+    )(state, action);
+}
+
 export function currentPackageReducer(state, action) {
     return createReducer(null,
         on(currentPackageLoaded, (currentState, { value }) => {
@@ -105,6 +117,7 @@ export const reducers: ActionReducerMap<ApplicationState> = {
     packageSearchQuery: packageSearchQueryReducer,
     packageSearchResult: packageSearchResultsReducer,
     selectedPackageName: selectedPackageIdReducer,
+    fetchedPackage: fetchedPackageReducer,
     loadedPackage: currentPackageReducer,
     installingPackage: installingPackageReducer,
     uninstallingPackage: uninstallingPackageReducer,

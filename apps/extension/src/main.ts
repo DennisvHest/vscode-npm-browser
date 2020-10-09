@@ -30,15 +30,19 @@ export function activate(context: vscode.ExtensionContext) {
 		browser.onValueCommand = onValueCommand;
 		browser.onVSCodeToastCommand = onVSCodeToastCommand;
 
-		npmTerminal.onCommandComplete = (command, success) => {
+		npmTerminal.onCommandComplete = (command, success, result) => {
 			if (command.type === CommandTypes.npmInstall)
 				browser.sendCommand({ type: CommandTypes.npmInstallComplete });
 
 			if (command.type === CommandTypes.npmUninstall)
 				browser.sendCommand({ type: CommandTypes.npmUninstallComplete });
 
-			if (!success)
+			if (success) {
+				if (command.type === CommandTypes.fetchPackage)
+					browser.sendCommand({ type: CommandTypes.fetchPackageComplete, value: result } as ValueCommand);
+			} else {
 				vscode.window.showErrorMessage("Something went wrong executing an NPM command. See the terminal window for details.")
+			}
 		}
 
 		npmTerminal.findPackageJsons();

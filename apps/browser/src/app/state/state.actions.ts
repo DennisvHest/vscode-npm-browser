@@ -58,3 +58,9 @@ export const packageJsonSelected = createAction(
     "[Settings] Package.json selected.",
     props<{ value: ValueCommand }>()
 );
+
+// Package info actions
+export const packageFetched = createAction(
+    "[Package] Package fetched",
+    props<{ value: ValueCommand }>()
+);

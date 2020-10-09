@@ -14,6 +14,8 @@ export const getSelectedPackageResult = (state: ApplicationState) => {
     return state.packageSearchResult.objects.find(result => result.package.name === state.selectedPackageName);
 };
 
+export const getFetchedPackage = (state: ApplicationState) => state.fetchedPackage;
+
 export const getCurrentPackage = (state: ApplicationState) => state.loadedPackage;
 
 export const getInstallingPackage = (state: ApplicationState) => state.installingPackage;

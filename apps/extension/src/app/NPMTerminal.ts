@@ -20,7 +20,7 @@ export class NPMTerminal {
      * Function to run after a command completed execution. The completed
      * command is passed into the given function.
      */
-    onCommandComplete: ((command?: TerminalCommand, success?: boolean) => void) | undefined;
+    onCommandComplete: ((command?: TerminalCommand, success?: boolean, result?: any) => void) | undefined;
 
     private readonly postCommandListeners: { [key: string]: () => () => void } = {
         'npm-install': () => this.afterNPMInstall
@@ -152,12 +152,12 @@ export class NPMTerminal {
         }
     }
 
-    private completeCommand = async (success: boolean) => {
+    private completeCommand = async (success: boolean, result?: any) => {
         if (this.postCommandListeners[this._currentCommand!.type])
             this.postCommandListeners[this._currentCommand!.type]()();
 
         if (this.onCommandComplete)
-            this.onCommandComplete(this._currentCommand, success);
+            this.onCommandComplete(this._currentCommand, success, result);
 
         this._currentCommand = null;
     }
@@ -213,17 +213,14 @@ export class NPMTerminal {
     }
 
     runCommandAsChildProcess = async (command: TerminalCommand) => {
-        let packageInfo;
-
         try {
 			const result = await util.promisify(cp.exec)(command.command, { cwd: this.packageJsonPath });
-			packageInfo = JSON.parse(result.stdout);
+            const packageInfo = JSON.parse(result.stdout);
+            this.completeCommand(true, packageInfo);
 		} catch(e) {
-			console.error(`failed to execute command ${command.command}`);
-			return;
+            console.error(`failed to execute command ${command.command}`);
+            this.completeCommand(false);
         }
-        
-        //console.log(packageInfo);
     }
 
 }
