@@ -8,7 +8,7 @@ import { ApplicationState } from '../state';
 import { Store } from '@ngrx/store';
 import { packageSearchResultChanged, packageSearchQueryChanged } from '../state/state.actions';
 import { VSCodeService } from '../vscode/vscode.service';
-import { VSCodeToastCommand, ToastLevels, TerminalCommand, CommandTypes } from 'libs/shared/src';
+import { VSCodeToastCommand, ToastLevels, NpmViewCommand } from 'libs/shared/src';
 import { getFetchedPackage } from '../state/state.selectors';
 
 @Injectable({
@@ -43,7 +43,7 @@ export class PackageService {
   }
 
   getPackage(name: string): Observable<Package> {
-    this.vsCodeService.postCommand({ command: `npm view ${name} --json`, type: CommandTypes.fetchPackage } as TerminalCommand);
+    this.vsCodeService.postCommand(new NpmViewCommand(name));
 
     const registryRequest =  this.http.get<any>(`${this.baseUrl}/${name}`).pipe(
       catchError((error) => {
