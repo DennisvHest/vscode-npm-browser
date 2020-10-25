@@ -9,4 +9,5 @@ export class Package {
     distTags: DistributionTags;
     author: Author;
     versions: Version[];
+    isPrivate: boolean;
 }

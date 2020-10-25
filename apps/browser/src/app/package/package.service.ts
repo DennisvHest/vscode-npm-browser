@@ -87,6 +87,9 @@ export class PackageService {
   
             npmViewPackage.readme = readme;
           }
+        } else {
+          returnNpmPackage.isPrivate = true;
+          returnNpmPackage.readme = null;
         }
 
         return npmViewPackage as Package;
