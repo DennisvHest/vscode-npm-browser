@@ -13,3 +13,16 @@ export function applyRangeOptions(version: string, updateLevel: number): semver.
 
     return new semver.Range(prefix + version);
 }
+
+export function getUpdateLevelFromRangeOption(range: semver.Range): number {
+    if (range.raw.startsWith(">"))
+        return 1;
+
+    if (range.raw.startsWith("^"))
+        return 2;
+
+    if (range.raw.startsWith("~"))
+        return 1;
+    
+    return 0;
+}

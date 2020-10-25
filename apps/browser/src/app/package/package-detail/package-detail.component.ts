@@ -6,7 +6,7 @@ import { Store, select } from '@ngrx/store';
 import { getCurrentPackage, getInstallingPackage, getInstalledPackages, getUninstallingPackage } from '../../state/state.selectors';
 import { FormGroup, FormControl } from '@angular/forms';
 import { installPackage, uninstallPackage } from '../../state/state.actions';
-import { NpmInstallCommand, NpmUninstallCommand, InstalledPackage, PackageType } from 'libs/shared/src/index';
+import { NpmInstallCommand, NpmUninstallCommand, InstalledPackage, PackageType, getUpdateLevelFromRangeOption } from 'libs/shared/src/index';
 import { map } from 'rxjs/operators';
 import * as semver from 'semver';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -77,18 +77,14 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
       if (!npmPackage)
         return;
 
-      const packageChanged = !this.npmPackage || this.npmPackage.name !== npmPackage.name;
-
       this.npmPackage = npmPackage;
 
-      if (packageChanged) {
-        this.packageInstallForm.patchValue({
-          name: npmPackage.name,
-          version: npmPackage.distTags.latest,
-          updateLevel: 2,
-          packageType: installedVersion ? installedVersion.type : PackageType.Dependency
-        });
-      }
+      this.packageInstallForm.patchValue({
+        name: npmPackage.name,
+        version: npmPackage.distTags.latest,
+        updateLevel: installedVersion ? getUpdateLevelFromRangeOption(installedVersion.version) : 2,
+        packageType: installedVersion ? installedVersion.type : PackageType.Dependency
+      });
     });
   }
 
