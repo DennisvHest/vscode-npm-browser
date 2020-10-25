@@ -45,8 +45,17 @@ export class PackageService {
   getPackage(name: string): Observable<Package> {
     this.vsCodeService.postCommand({ command: `npm view ${name} --json`, type: CommandTypes.fetchPackage } as TerminalCommand);
 
+    const registryRequest =  this.http.get<any>(`${this.baseUrl}/${name}`).pipe(
+      catchError((error) => {
+        if (error.status !== 404)
+          this.reportRequestError(error);
+
+        return of(null);
+      })
+    );
+
     return this.store.select(getFetchedPackage).pipe(
-      withLatestFrom(this.http.get<any>(`${this.baseUrl}/${name}`)),
+      withLatestFrom(registryRequest),
       map(([npmViewPackage, registryPackage]) => {
         npmViewPackage.distTags = npmViewPackage['dist-tags'];
         
@@ -65,17 +74,19 @@ export class PackageService {
         if (!returnNpmPackage.author)
           returnNpmPackage.author = null;
 
-        const versions = Object.keys(registryPackage.versions);
+        if (registryPackage) {
+          const versions = Object.keys(registryPackage.versions);
 
-        const latestVersion = registryPackage.versions[versions[versions.length - 1]];
-
-        if (registryPackage && latestVersion) {
-          let readme = registryPackage.readme;
-
-          if (!readme) // Sometimes the readme field is empty even tough the latest version does have readme (problem with NPM registry?)
-            readme = latestVersion.readme;
-
-          npmViewPackage.readme = readme;
+          const latestVersion = registryPackage.versions[versions[versions.length - 1]];
+  
+          if (latestVersion) {
+            let readme = registryPackage.readme;
+  
+            if (!readme) // Sometimes the readme field is empty even tough the latest version does have readme (problem with NPM registry?)
+              readme = latestVersion.readme;
+  
+            npmViewPackage.readme = readme;
+          }
         }
 
         return npmViewPackage as Package;
