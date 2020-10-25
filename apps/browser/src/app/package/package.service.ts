@@ -42,10 +42,12 @@ export class PackageService {
     );
   }
 
-  getPackage(name: string): Observable<Package> {
+  getPackage(name: string) {
     this.vsCodeService.postCommand(new NpmViewCommand(name));
+  }
 
-    const registryRequest =  this.http.get<any>(`${this.baseUrl}/${name}`).pipe(
+  mapFetchedPackage(npmViewPackage: any): Observable<Package> {
+    const registryRequest = this.http.get<any>(`${this.baseUrl}/${npmViewPackage.name}`).pipe(
       catchError((error) => {
         if (error.status !== 404)
           this.reportRequestError(error);
@@ -54,11 +56,10 @@ export class PackageService {
       })
     );
 
-    return this.store.select(getFetchedPackage).pipe(
-      withLatestFrom(registryRequest),
-      map(([npmViewPackage, registryPackage]) => {
+    return registryRequest.pipe(
+      map(registryPackage => {
         npmViewPackage.distTags = npmViewPackage['dist-tags'];
-        
+
         // Map versions to an array of version objects instead of a property per version.
         npmViewPackage.versions = Object.keys(npmViewPackage.versions).map(v => {
           const version = { version: npmViewPackage.versions[v], distTags: [] };
@@ -78,29 +79,25 @@ export class PackageService {
           const versions = Object.keys(registryPackage.versions);
 
           const latestVersion = registryPackage.versions[versions[versions.length - 1]];
-  
+
           if (latestVersion) {
             let readme = registryPackage.readme;
-  
+
             if (!readme) // Sometimes the readme field is empty even tough the latest version does have readme (problem with NPM registry?)
               readme = latestVersion.readme;
-  
-            npmViewPackage.readme = readme;
+
+              returnNpmPackage.readme = readme;
           }
+
+          returnNpmPackage.isPrivate = false;
         } else {
           returnNpmPackage.isPrivate = true;
           returnNpmPackage.readme = null;
         }
 
-        return npmViewPackage as Package;
-      }),
-      take(1),
-      catchError(error => {
-        this.reportRequestError(error);
-
-        return of(null);
+        return returnNpmPackage as Package;
       })
-    );
+    )
   }
 
   private reportRequestError(error) {

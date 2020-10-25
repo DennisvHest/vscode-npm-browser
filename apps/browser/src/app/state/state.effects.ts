@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { withLatestFrom, map, mergeMap } from 'rxjs/operators';
+import { withLatestFrom, map, mergeMap, tap } from 'rxjs/operators';
 import { ApplicationState } from '.';
 import { Store } from '@ngrx/store';
-import { selectedPackageChanged, currentPackageLoaded, installPackage, packageJsonSelected, uninstallPackage } from './state.actions';
+import { selectedPackageChanged, currentPackageLoaded, installPackage, packageJsonSelected, uninstallPackage, packageFetched } from './state.actions';
 import { PackageService } from '../package/package.service';
 import { VSCodeService } from '../vscode/vscode.service';
 
@@ -19,7 +19,12 @@ export class ApplicationStateEffects {
 
     loadCurrentPackage$ = createEffect(() => this.actions$.pipe(
         ofType(selectedPackageChanged),
-        mergeMap(action => this.packageService.getPackage(action.value)
+        tap(action => this.packageService.getPackage(action.value))
+    ), { dispatch: false });
+
+    mapFetchedPackage$ = createEffect(() => this.actions$.pipe(
+        ofType(packageFetched),
+        mergeMap(action => this.packageService.mapFetchedPackage(action.value)
             .pipe(
                 map(resultPackage => currentPackageLoaded({ value: resultPackage }))
             ))

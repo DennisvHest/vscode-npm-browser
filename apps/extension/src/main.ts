@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
 
 	function reinitializeBrowser() {
 		if (!browser || !browser.isOpen) {
-			browser = new BrowserWebView(context, false);
+			browser = new BrowserWebView(context, true);
 		} else {
 			browser.setActivePanel();
 		}
