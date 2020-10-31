@@ -22,7 +22,7 @@ export function getUpdateLevelFromRangeOption(range: semver.Range): number {
         return 2;
 
     if (range.raw.startsWith("~"))
-        return 1;
+        return 3;
     
     return 0;
 }
