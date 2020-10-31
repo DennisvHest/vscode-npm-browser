@@ -6,7 +6,7 @@
         <div class="col">
             <h1>{{ npmPackage.name }}</h1>
             <h6 *ngIf="npmPackage.author" class="d-inline-block">{{ npmPackage.author.name }}</h6>
-            <a *ngIf="!npmPackage.isPrivate" id="to-npmjs" href="https://www.npmjs.com/package/{{npmPackage.name}}" [class.ml-4]="npmPackage.author">
+            <a *ngIf="!npmPackage.isPrivate" id="to-npmjs" href="https://www.npmjs.com/package/{{npmPackage.name}}" [class.ml-4]="npmPackage.author && npmPackage.author.name">
                 <span class="badge badge-secondary p-1"><img [src]="assetUrl('npm-logo-white.svg')" class="mr-1" /> View on npmjs.com</span>
             </a>
             <p id="package-description" [title]="npmPackage.description">{{ npmPackage.description }}</p>

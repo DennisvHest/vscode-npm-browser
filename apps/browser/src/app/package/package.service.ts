@@ -70,6 +70,8 @@ export class PackageService {
           return version;
         });
 
+        npmViewPackage.author = { name: npmViewPackage.author };
+
         const returnNpmPackage = npmViewPackage as Package;
 
         if (!returnNpmPackage.author)
@@ -88,6 +90,9 @@ export class PackageService {
 
               returnNpmPackage.readme = readme;
           }
+
+          if (registryPackage.author)
+            returnNpmPackage.author = registryPackage.author;
 
           returnNpmPackage.isPrivate = false;
         } else {

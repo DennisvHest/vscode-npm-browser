@@ -6,6 +6,7 @@ import { Store } from '@ngrx/store';
 import { selectedPackageChanged, currentPackageLoaded, installPackage, packageJsonSelected, uninstallPackage, packageFetched } from './state.actions';
 import { PackageService } from '../package/package.service';
 import { VSCodeService } from '../vscode/vscode.service';
+import { LoadingBarService } from "@ngx-loading-bar/core";
 
 @Injectable()
 export class ApplicationStateEffects {
@@ -35,10 +36,21 @@ export class ApplicationStateEffects {
         map(action => this.vsCodeService.postCommand(action.value))
     ), { dispatch: false });
 
+    packageFetchLoadingBarStart$ = createEffect(() => this.actions$.pipe(
+        ofType(selectedPackageChanged),
+        tap(action => this.loadingBarService.start())
+    ), { dispatch: false });
+
+    packageFetchLoadingBarComplete$ = createEffect(() => this.actions$.pipe(
+        ofType(currentPackageLoaded),
+        tap(action => this.loadingBarService.complete())
+    ), { dispatch: false });
+
     constructor(
         private actions$: Actions,
         private store$: Store<ApplicationState>,
         private packageService: PackageService,
-        private vsCodeService: VSCodeService
+        private vsCodeService: VSCodeService,
+        private loadingBarService: LoadingBarService
     ) { }
 }

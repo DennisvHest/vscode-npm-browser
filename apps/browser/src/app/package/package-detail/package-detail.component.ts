@@ -7,7 +7,7 @@ import { getCurrentPackage, getInstallingPackage, getInstalledPackages, getUnins
 import { FormGroup, FormControl } from '@angular/forms';
 import { installPackage, uninstallPackage } from '../../state/state.actions';
 import { NpmInstallCommand, NpmUninstallCommand, InstalledPackage, PackageType, getUpdateLevelFromRangeOption } from 'libs/shared/src/index';
-import { map } from 'rxjs/operators';
+import { filter, map, take } from 'rxjs/operators';
 import * as semver from 'semver';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -73,6 +73,18 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
       }
     })).subscribe(version => this.selectedVersion = version);
 
+    combineLatest(this.package$, this.installedVersion$).pipe(
+      filter(([npmPackage,]) => {
+        const packageChanged = !this.npmPackage || this.npmPackage.name !== npmPackage.name;
+        
+        return npmPackage != null && packageChanged;
+      }),
+    ).subscribe(([npmPackage,]) => {
+      this.packageInstallForm.patchValue({
+        version: npmPackage.distTags.latest
+      });
+    });
+
     this.packageSubscription = combineLatest(this.package$, this.installedVersion$).subscribe(([npmPackage, installedVersion]) => {
       if (!npmPackage)
         return;
@@ -81,7 +93,6 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
 
       this.packageInstallForm.patchValue({
         name: npmPackage.name,
-        version: npmPackage.distTags.latest,
         updateLevel: installedVersion ? getUpdateLevelFromRangeOption(installedVersion.version) : 2,
         packageType: installedVersion ? installedVersion.type : PackageType.Dependency
       });
