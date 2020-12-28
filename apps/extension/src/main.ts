@@ -57,7 +57,7 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 
 	const treeView = vscode.window.createTreeView("dependencies", {
-		treeDataProvider: new DependencyTreeDataProvider(npmTerminal.packageJson, context)
+		treeDataProvider: new DependencyTreeDataProvider(npmTerminal.packageJson, npmTerminal.packageUpdates, context)
 	});
 
 	treeView.onDidChangeVisibility(async (event) => {
@@ -65,6 +65,7 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 
 		reinitializeBrowser();
+		npmTerminal.checkPackageUpdates();
 	});
 
 	function onValueCommand(command: ValueCommand) {

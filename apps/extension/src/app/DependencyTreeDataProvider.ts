@@ -1,8 +1,25 @@
 import * as vscode from 'vscode';
 import { DependencyTreeItem } from './DependencyTreeItem';
 import { DependencyGroupTreeItem } from './DependencyGroupTreeItem';
-import { PackageJson } from 'libs/shared/src';
-import { Observable, Subscription } from 'rxjs';
+import { PackageJson, PackageUpdatesItem } from 'libs/shared/src';
+import { combineLatest, Observable, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+type Dependency = {
+    packageItem: PackageItem;
+    updates: PackageUpdatesItem;
+}
+
+type PackageItem  = {
+    name: string;
+    version: string;
+};
+
+type DependencyCollection = {
+    dependencies: Dependency[];
+    devDependencies: Dependency[];
+    optionalDependencies: Dependency[];
+}
 
 export class DependencyTreeDataProvider implements vscode.TreeDataProvider<vscode.TreeItem>, vscode.Disposable {
     
@@ -11,11 +28,22 @@ export class DependencyTreeDataProvider implements vscode.TreeDataProvider<vscod
 
     private _packageJsonSubscription: Subscription;
     
-    private _packageJson: PackageJson | undefined;
+    private _dependencyCollection: DependencyCollection;
 
-    constructor(private _packageJson$: Observable<PackageJson | undefined>, private _context: vscode.ExtensionContext) {
-        this._packageJsonSubscription = this._packageJson$.subscribe(packageJson => {
-            this._packageJson = packageJson;
+    constructor(private _packageJson$: Observable<PackageJson | undefined>, private _packageUpdates$: Observable<{ [name: string]: PackageUpdatesItem; }>, private _context: vscode.ExtensionContext) {
+        this._packageJsonSubscription = combineLatest([this._packageJson$, this._packageUpdates$]).pipe(
+            map(([packageJson, packageUpdates]): DependencyCollection => {
+                return {
+                    dependencies: Object.keys(packageJson.dependencies || {})
+                        .map(dependency => ({ packageItem: { name: dependency, version: packageJson.dependencies[dependency] }, updates: packageUpdates[dependency] })),
+                    devDependencies: Object.keys(packageJson.devDependencies || {})
+                        .map(dependency => ({ packageItem: { name: dependency, version: packageJson.devDependencies[dependency] }, updates: packageUpdates[dependency] })),
+                    optionalDependencies: Object.keys(packageJson.optionalDependencies || {})
+                        .map(dependency => ({ packageItem: { name: dependency, version: packageJson.optionalDependencies[dependency] }, updates: packageUpdates[dependency] }))
+                }
+            })
+        ).subscribe(dependencyCollection => {
+            this._dependencyCollection = dependencyCollection;
 
             this._onDidChangeTreeData.fire();
         });
@@ -31,15 +59,15 @@ export class DependencyTreeDataProvider implements vscode.TreeDataProvider<vscod
             let devDependencies: DependencyTreeItem[] = [];
             let optionalDependencies: DependencyTreeItem[] = [];
 
-            if (this._packageJson) {
-                dependencies = Object.keys(this._packageJson.dependencies ? this._packageJson.dependencies : {})
-                    .map(packageName => new DependencyTreeItem(packageName, this._packageJson.dependencies[packageName], this._context));
+            if (this._dependencyCollection) {
+                dependencies = this._dependencyCollection.dependencies
+                    .map(dependency => new DependencyTreeItem(dependency.packageItem.name, dependency.packageItem.version, dependency.updates, this._context));
 
-                devDependencies = Object.keys(this._packageJson.devDependencies ? this._packageJson.devDependencies : {})
-                    .map(packageName => new DependencyTreeItem(packageName, this._packageJson.devDependencies[packageName], this._context));
+                devDependencies = this._dependencyCollection.devDependencies
+                    .map(dependency => new DependencyTreeItem(dependency.packageItem.name, dependency.packageItem.version, dependency.updates, this._context));
 
-                optionalDependencies = Object.keys(this._packageJson.optionalDependencies ? this._packageJson.optionalDependencies : {})
-                    .map(packageName => new DependencyTreeItem(packageName, this._packageJson.optionalDependencies[packageName], this._context));
+                optionalDependencies = this._dependencyCollection.optionalDependencies
+                    .map(dependency => new DependencyTreeItem(dependency.packageItem.name, dependency.packageItem.version, dependency.updates, this._context));
             }
 
             return [

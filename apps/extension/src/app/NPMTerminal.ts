@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { TerminalCommand, CommandTypes, PackageJson, NpmInstallCommand, PackageType } from '../../../../libs/shared/src/index';
+import { TerminalCommand, PackageJson, NpmInstallCommand, PackageType, PackageUpdatesItem, NpmOutdatedCommand, CommandTypes } from '../../../../libs/shared/src/index';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import * as fs from "fs";
@@ -14,6 +14,8 @@ export class NPMTerminal {
     private _packageJson$: BehaviorSubject<PackageJson | undefined> = new BehaviorSubject<PackageJson | undefined>(undefined);
     private _packageJsons$: BehaviorSubject<PackageJson[]> = new BehaviorSubject<PackageJson[]>([]);
 
+    private _packageUpdates$ = new BehaviorSubject<{ [name: string]: PackageUpdatesItem; }>({});
+
     private _packageJsonFileWatcher: vscode.FileSystemWatcher | undefined;
 
     /**
@@ -22,8 +24,9 @@ export class NPMTerminal {
      */
     onCommandComplete: ((command?: TerminalCommand, success?: boolean, result?: any) => void) | undefined;
 
-    private readonly postCommandListeners: { [key: string]: () => () => void } = {
-        'npm-install': () => this.afterNPMInstall
+    private readonly postCommandListeners: { [key: string]: () => (success: boolean, result?: any) => void } = {
+        'npm-install': () => this.afterNPMInstall,
+        'npm-outdated': () => this.afterNpmOutdatedCommand
     };
 
     constructor() {
@@ -44,6 +47,10 @@ export class NPMTerminal {
 
     get packageJsons(): Observable<PackageJson[]> {
         return this._packageJsons$;
+    }
+
+    get packageUpdates(): Observable<{ [name: string]: PackageUpdatesItem; }> {
+        return this._packageUpdates$;
     }
 
     private get packageJsonPath(): string {
@@ -152,9 +159,13 @@ export class NPMTerminal {
         }
     }
 
+    checkPackageUpdates() {
+        this.runCommand(new NpmOutdatedCommand());
+    }
+
     private completeCommand = async (success: boolean, result?: any) => {
         if (this.postCommandListeners[this._currentCommand!.type])
-            this.postCommandListeners[this._currentCommand!.type]()();
+            this.postCommandListeners[this._currentCommand!.type]()(success, result);
 
         if (this.onCommandComplete)
             this.onCommandComplete(this._currentCommand, success, result);
@@ -176,6 +187,17 @@ export class NPMTerminal {
             packageJson[dependencyType][installCommand.packageName] = installCommand.versionRange;
 
         fs.writeFileSync(this._packageJson!.filePath, JSON.stringify(packageJson, null, 2))
+    }
+
+    private afterNpmOutdatedCommand = (success: boolean, result?: any) => {
+        if (!success)
+            this._packageUpdates$.next({});
+
+        for (let packageName of Object.keys(result)) {
+            result[packageName] = new PackageUpdatesItem(result[packageName]);
+        }
+
+        this._packageUpdates$.next(result);
     }
 
     /**
@@ -213,14 +235,24 @@ export class NPMTerminal {
     }
 
     runCommandAsChildProcess = async (command: TerminalCommand) => {
+        let stdout;
+
         try {
-			const result = await util.promisify(cp.exec)(command.command, { cwd: this.packageJsonPath });
-            const packageInfo = JSON.parse(result.stdout);
-            this.completeCommand(true, packageInfo);
-		} catch(e) {
-            console.error(`failed to execute command ${command.command}`);
-            this.completeCommand(false);
+            const result = await util.promisify(cp.exec)(command.command, { cwd: this.packageJsonPath });
+            stdout = result.stdout;
+        } catch (e) {
+            // NPM outdated returns exit code 1 when outdated packages are found
+            if (e.code === 1 && command.type === CommandTypes.npmOutdated) {
+                stdout = e.stdout;
+            } else {
+                console.error(`failed to execute command ${command.command}`);
+                this.completeCommand(false);
+                return;
+            }
         }
+
+        const packageInfo = JSON.parse(stdout);
+        this.completeCommand(true, packageInfo);
     }
 
 }
