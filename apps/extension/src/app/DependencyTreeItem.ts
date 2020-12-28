@@ -9,7 +9,12 @@ export class DependencyTreeItem extends TreeItem {
     packageVersion: string;
     
     constructor(name: string, version: string, updates: PackageUpdatesItem, context: vscode.ExtensionContext) {
-        super(`${name} (${version}) ${updates && updates.hasUpdateInRange ? '(Update available)' : ''}`);
+        super(`${name}`);
+
+        const hasUpdate = updates && updates.hasUpdateInRange;
+
+        this.description = `(${version}) ${hasUpdate ? `- Update (${updates.wanted}) available` : ''}`;
+        this.tooltip = `${name} (${version}) ${hasUpdate ? `- Has a new version (${updates.wanted}) within the version range specified in the package.json` : ''}`
 
         this.packageName = name;
         this.packageVersion = version;
@@ -21,8 +26,8 @@ export class DependencyTreeItem extends TreeItem {
         }
 
         this.iconPath = {
-            light: vscode.Uri.file(path.join(context.extensionPath, '/apps/extension/src/assets', 'dependency-light.svg')),
-            dark: vscode.Uri.file(path.join(context.extensionPath, '/apps/extension/src/assets', 'dependency-dark.svg'))
+            light: vscode.Uri.file(path.join(context.extensionPath, '/apps/extension/src/assets', `dependency-${hasUpdate ? 'update-' : ''}light.svg`)),
+            dark: vscode.Uri.file(path.join(context.extensionPath, '/apps/extension/src/assets', `dependency-${hasUpdate ? 'update-' : ''}dark.svg`))
         };
     }
 }
