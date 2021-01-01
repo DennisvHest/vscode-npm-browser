@@ -53,6 +53,11 @@ export const packageJsonsUpdated = createAction(
     props<{ value: PackageJson[] }>()
 );
 
+export const packageUpdatesFound = createAction(
+    '[Install] Package updates found.',
+    props<{ value: ValueCommand }>()
+);
+
 // Settings actions
 export const packageJsonSelected = createAction(
     "[Settings] Package.json selected.",

@@ -22,6 +22,8 @@ export const getInstallingPackage = (state: ApplicationState) => state.installin
 
 export const getUninstallingPackage = (state: ApplicationState) => state.uninstallingPackage;
 
+export const getPackageUpdates = (state: ApplicationState) => state.packageUpdates;
+
 export const getInstalledPackages = (state: ApplicationState): InstalledPackage[] => {
     if (!state.vscodeWorkspace.selectedPackageJson)
         return [];

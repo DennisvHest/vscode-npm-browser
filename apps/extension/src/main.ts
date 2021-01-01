@@ -40,6 +40,9 @@ export function activate(context: vscode.ExtensionContext) {
 			if (success) {
 				if (command.type === CommandTypes.fetchPackage)
 					browser.sendCommand({ type: CommandTypes.fetchPackageComplete, value: result } as ValueCommand);
+
+				if (command.type === CommandTypes.npmOutdated)
+					browser.sendCommand({ type: CommandTypes.npmOutdated, value: result } as ValueCommand);
 			} else {
 				vscode.window.showErrorMessage("Something went wrong executing an NPM command. See the terminal window for details.")
 			}

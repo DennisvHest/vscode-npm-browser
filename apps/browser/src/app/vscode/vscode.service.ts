@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { ApplicationState } from '../state';
 import { CommandTypes, ValueCommand } from 'libs/shared/src';
 import { Store } from '@ngrx/store';
-import { installPackageComplete, packageJsonUpdated, uninstallPackageComplete, packageJsonsUpdated, selectedPackageChanged, packageFetched } from '../state/state.actions';
+import { installPackageComplete, packageJsonUpdated, uninstallPackageComplete, packageJsonsUpdated, selectedPackageChanged, packageFetched, packageUpdatesFound } from '../state/state.actions';
 
 @Injectable({
   providedIn: 'root'
@@ -18,6 +18,7 @@ export class VSCodeService {
         case CommandTypes.packageJsonsUpdated: this.store.dispatch(packageJsonsUpdated({ value: (event.data as ValueCommand).value })); break;
         case CommandTypes.installedPackageSelected: this.store.dispatch(selectedPackageChanged({ value: (event.data as ValueCommand).value })); break;
         case CommandTypes.fetchPackageComplete: this.store.dispatch(packageFetched({ value: (event.data as ValueCommand).value })); break;
+        case CommandTypes.npmOutdated: this.store.dispatch(packageUpdatesFound({ value: (event.data as ValueCommand).value })); break;
       }
     });
   }

@@ -1,7 +1,8 @@
 import { ActionReducerMap, createReducer, on } from '@ngrx/store';
-import { packageSearchResultChanged, selectedPackageChanged, currentPackageLoaded, installPackage, installPackageComplete, packageJsonSelected, packageJsonUpdated, uninstallPackage, uninstallPackageComplete, packageSearchQueryChanged, packageJsonsUpdated, packageFetched } from './state.actions';
+import { packageSearchResultChanged, selectedPackageChanged, currentPackageLoaded, installPackage, installPackageComplete, packageJsonSelected, packageJsonUpdated, uninstallPackage, uninstallPackageComplete, packageSearchQueryChanged, packageJsonsUpdated, packageFetched, packageUpdatesFound } from './state.actions';
 import { PackageSearchResult } from '../model/package-search-result.model';
 import { Package } from '../model/package.model';
+import { PackageUpdatesItem } from 'libs/shared/src';
 
 export interface ApplicationState {
     packageSearchQuery: PackageSearchQuery;
@@ -11,6 +12,7 @@ export interface ApplicationState {
     fetchedPackage: any;
     installingPackage: boolean;
     uninstallingPackage: boolean;
+    packageUpdates: { [name: string]: PackageUpdatesItem; };
     vscodeWorkspace: VSCodeWorkspace;
 }
 
@@ -34,6 +36,8 @@ export function initialState() {
             selectedPackageId: null,
             loadedPackage: null,
             installingPackage: null,
+            uninstallingPackage: null,
+            packageUpdates: null,
             vscodeWorkspace: workspaceState
         };
     }
@@ -99,6 +103,17 @@ export function uninstallingPackageReducer(state, action) {
     )(state, action);
 }
 
+export function packageUpdatesReducer(state, action) {
+    return createReducer(null,
+        on(packageUpdatesFound, (currentState, { value }) => {
+            if (!currentState)
+                return value;
+
+            return { ...currentState, ...value };
+        })
+    )(state, action);
+}
+
 export function vscodeWorkspaceReducer(state, action) {
     const updatePackageJson = (currentState, { value }) => {
         return { ...currentState, selectedPackageJson: value }
@@ -121,6 +136,7 @@ export const reducers: ActionReducerMap<ApplicationState> = {
     loadedPackage: currentPackageReducer,
     installingPackage: installingPackageReducer,
     uninstallingPackage: uninstallingPackageReducer,
+    packageUpdates: packageUpdatesReducer,
     vscodeWorkspace: vscodeWorkspaceReducer
 };
 

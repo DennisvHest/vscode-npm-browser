@@ -3,11 +3,11 @@ import { Observable, Subscription, combineLatest, BehaviorSubject } from 'rxjs';
 import { Package } from '../../model/package.model';
 import { ApplicationState } from '../../state';
 import { Store, select } from '@ngrx/store';
-import { getCurrentPackage, getInstallingPackage, getInstalledPackages, getUninstallingPackage } from '../../state/state.selectors';
+import { getCurrentPackage, getInstallingPackage, getInstalledPackages, getUninstallingPackage, getPackageUpdates } from '../../state/state.selectors';
 import { FormGroup, FormControl } from '@angular/forms';
 import { installPackage, uninstallPackage } from '../../state/state.actions';
 import { NpmInstallCommand, NpmUninstallCommand, InstalledPackage, PackageType, getUpdateLevelFromRangeOption } from 'libs/shared/src/index';
-import { filter, map, take } from 'rxjs/operators';
+import { filter, map, startWith, take } from 'rxjs/operators';
 import * as semver from 'semver';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { DomSanitizer } from '@angular/platform-browser';
@@ -47,6 +47,8 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
     this.installingPackage$ = this.store.pipe(select(getInstallingPackage));
     this.uninstallingPackage$ = this.store.pipe(select(getUninstallingPackage));
 
+    const packageUpdates = this.store.pipe(startWith({}), select(getPackageUpdates));
+
     this.installedVersion$ = combineLatest(this.store.pipe(select(getInstalledPackages)), this.package$)
       .pipe(
         map(([installedPackages, currentPackage]) => {
@@ -73,15 +75,17 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
       }
     })).subscribe(version => this.selectedVersion = version);
 
-    combineLatest(this.package$, this.installedVersion$).pipe(
+    combineLatest(this.package$, packageUpdates, this.installedVersion$).pipe(
       filter(([npmPackage,]) => {
         const packageChanged = !this.npmPackage || this.npmPackage.name !== npmPackage.name;
         
         return npmPackage != null && packageChanged;
       }),
-    ).subscribe(([npmPackage,]) => {
+    ).subscribe(([npmPackage, _packageUpdates]) => {
+      const updatesForPackage = _packageUpdates[npmPackage.name];
+
       this.packageInstallForm.patchValue({
-        version: npmPackage.distTags.latest
+        version: updatesForPackage ? updatesForPackage.wanted.version : npmPackage.distTags.latest
       });
     });
 
