@@ -4,9 +4,8 @@ import { BehaviorSubject, Observable } from 'rxjs';
 
 import * as fs from "fs";
 import * as readPackageJson from 'read-package-json';
-import * as util from 'util'
-import * as cp from 'child_process'
-import { ENGINE_METHOD_DIGESTS } from 'constants';
+import * as util from 'util';
+import * as cp from 'child_process';
 
 export class NPMTerminal {
 
@@ -31,6 +30,7 @@ export class NPMTerminal {
 
     private readonly postCommandListeners: { [key: string]: () => (success: boolean, result?: any) => void } = {
         'npm-install': () => this.afterNPMInstall,
+        'npm-uninstall': () => this.afterNPMUninstall,
         'npm-outdated': () => this.afterNpmOutdatedCommand
     };
 
@@ -194,6 +194,10 @@ export class NPMTerminal {
 
         fs.writeFileSync(this._packageJson!.filePath, JSON.stringify(packageJson, null, 2));
 
+        this.checkPackageUpdates();
+    }
+
+    private afterNPMUninstall = () => {
         this.checkPackageUpdates();
     }
 

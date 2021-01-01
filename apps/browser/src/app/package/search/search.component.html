@@ -6,8 +6,7 @@
         <npmb-package-list #searchResultList
             [packages]="packages$ | async" 
             [activePackageName]="currentPackageName$ | async" 
-            (packageSelected)="onPackageSelected($event)"
-            class="h-100">
+            (packageSelected)="onPackageSelected($event)">
         </npmb-package-list>
         <ngb-pagination 
             *ngIf="(searchResult$ | async).total > 0" 

@@ -109,7 +109,7 @@ export function packageUpdatesReducer(state, action) {
             if (!currentState)
                 return value;
 
-            return { ...currentState, ...value };
+            return { ...value };
         })
     )(state, action);
 }
