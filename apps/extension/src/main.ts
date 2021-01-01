@@ -26,7 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
 			browser.setActivePanel();
 		}
 
-		browser.onTerminalCommand = npmTerminal.runCommand;
+		browser.onTerminalCommand = npmTerminal.queueCommand;
 		browser.onValueCommand = onValueCommand;
 		browser.onVSCodeToastCommand = onVSCodeToastCommand;
 

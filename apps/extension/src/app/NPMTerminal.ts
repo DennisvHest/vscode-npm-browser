@@ -6,10 +6,15 @@ import * as fs from "fs";
 import * as readPackageJson from 'read-package-json';
 import * as util from 'util'
 import * as cp from 'child_process'
+import { ENGINE_METHOD_DIGESTS } from 'constants';
 
 export class NPMTerminal {
 
-    private _currentCommand: TerminalCommand | undefined | null;
+    private _currentCommands: TerminalCommand[] = [];
+
+    private get _currentCommand() {
+        return this._currentCommands[0];
+    };
 
     private _packageJson$: BehaviorSubject<PackageJson | undefined> = new BehaviorSubject<PackageJson | undefined>(undefined);
     private _packageJsons$: BehaviorSubject<PackageJson[]> = new BehaviorSubject<PackageJson[]>([]);
@@ -160,7 +165,7 @@ export class NPMTerminal {
     }
 
     checkPackageUpdates() {
-        this.runCommand(new NpmOutdatedCommand());
+        this.queueCommand(new NpmOutdatedCommand());
     }
 
     private completeCommand = async (success: boolean, result?: any) => {
@@ -170,7 +175,8 @@ export class NPMTerminal {
         if (this.onCommandComplete)
             this.onCommandComplete(this._currentCommand, success, result);
 
-        this._currentCommand = null;
+        this._currentCommands.shift();
+        this.runNextCommand();
     }
 
     private afterNPMInstall = () => {
@@ -186,7 +192,9 @@ export class NPMTerminal {
         if (packageJson[dependencyType] && packageJson[dependencyType][installCommand.packageName])
             packageJson[dependencyType][installCommand.packageName] = installCommand.versionRange;
 
-        fs.writeFileSync(this._packageJson!.filePath, JSON.stringify(packageJson, null, 2))
+        fs.writeFileSync(this._packageJson!.filePath, JSON.stringify(packageJson, null, 2));
+
+        this.checkPackageUpdates();
     }
 
     private afterNpmOutdatedCommand = (success: boolean, result?: any) => {
@@ -201,16 +209,28 @@ export class NPMTerminal {
     }
 
     /**
-     * Runs the given TerminalCommand in the NPM terminal.
-     * @param command TerminalCommand to run.
+     * Adds the given command to the queue to be processed. If the given command is the only one in the queue, it is immediately run.
+     * @param command TerminalCommand to enqueue.
      */
-    runCommand = (command: TerminalCommand) => {
-        this._currentCommand = command;
+    queueCommand = (command: TerminalCommand) => {
+        this._currentCommands.push(command);
 
-        if (command.runAsVSCodeTask) {
-            this.runCommandAsVSCodeTask(command);
-        } else {
-            this.runCommandAsChildProcess(command);
+        if (this._currentCommands.length === 1)
+            this.runNextCommand();
+    }
+
+    /**
+     * Runs the next TerminalCommand in the NPM terminal.
+     */
+    runNextCommand = () => {
+        const nextCommand = this._currentCommands[0];
+
+        if (nextCommand) {
+            if (nextCommand.runAsVSCodeTask) {
+                this.runCommandAsVSCodeTask(nextCommand);
+            } else {
+                this.runCommandAsChildProcess(nextCommand);
+            }
         }
     }
 
