@@ -4,6 +4,7 @@ import { DependencyGroupTreeItem } from './DependencyGroupTreeItem';
 import { PackageJson, PackageUpdatesItem } from 'libs/shared/src';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { UpdateAllPackagesTreeItem } from './UpdateAllPackagesTreeItem';
 
 type Dependency = {
     packageItem: PackageItem;
@@ -71,6 +72,7 @@ export class DependencyTreeDataProvider implements vscode.TreeDataProvider<vscod
             }
 
             return [
+                new UpdateAllPackagesTreeItem(this._context),
                 new DependencyGroupTreeItem('Dependencies', dependencies),
                 new DependencyGroupTreeItem('Development dependencies', devDependencies),
                 new DependencyGroupTreeItem('Optional dependencies', optionalDependencies)

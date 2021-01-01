@@ -7,7 +7,9 @@ import { Subscription } from 'rxjs';
 
 let packageJsonSubscription: Subscription;
 let packageJsonsSubscription: Subscription;
+
 let openPackageDetailCommandRegistration: vscode.Disposable;
+let updateAllPackagesCommandRegistration: vscode.Disposable;
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -57,6 +59,14 @@ export function activate(context: vscode.ExtensionContext) {
 
 		const command: ValueCommand = { type: CommandTypes.installedPackageSelected, value: packageName };
 		browser.sendCommand(command);
+	});
+
+	updateAllPackagesCommandRegistration = vscode.commands.registerCommand('npm-browser.update-all-packages', async () => {
+		const response = await vscode.window.showQuickPick(['Yes', 'No'], { placeHolder: 'Are you sure you want to update all packages?' });
+
+		if (response === 'Yes') {
+			npmTerminal.updateAllPackages();
+		}
 	});
 
 	const treeView = vscode.window.createTreeView("dependencies", {
@@ -113,5 +123,6 @@ export function deactivate() {
 		packageJsonsSubscription.unsubscribe();
 
 	openPackageDetailCommandRegistration.dispose();
+	updateAllPackagesCommandRegistration.dispose();
 }
 

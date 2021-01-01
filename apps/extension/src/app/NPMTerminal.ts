@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { TerminalCommand, PackageJson, NpmInstallCommand, PackageType, PackageUpdatesItem, NpmOutdatedCommand, CommandTypes } from '../../../../libs/shared/src/index';
+import { TerminalCommand, PackageJson, NpmInstallCommand, PackageType, PackageUpdatesItem, NpmOutdatedCommand, NpmUpdateCommand, CommandTypes } from '../../../../libs/shared/src/index';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import * as fs from "fs";
@@ -31,7 +31,8 @@ export class NPMTerminal {
     private readonly postCommandListeners: { [key: string]: () => (success: boolean, result?: any) => void } = {
         'npm-install': () => this.afterNPMInstall,
         'npm-uninstall': () => this.afterNPMUninstall,
-        'npm-outdated': () => this.afterNpmOutdatedCommand
+        'npm-outdated': () => this.afterNpmOutdatedCommand,
+        'npm-update': () => this.afterNPMUpdate
     };
 
     constructor() {
@@ -168,6 +169,10 @@ export class NPMTerminal {
         this.queueCommand(new NpmOutdatedCommand());
     }
 
+    updateAllPackages() {
+        this.queueCommand(new NpmUpdateCommand());
+    }
+
     private completeCommand = async (success: boolean, result?: any) => {
         if (this.postCommandListeners[this._currentCommand!.type])
             this.postCommandListeners[this._currentCommand!.type]()(success, result);
@@ -198,6 +203,10 @@ export class NPMTerminal {
     }
 
     private afterNPMUninstall = () => {
+        this.checkPackageUpdates();
+    }
+
+    private afterNPMUpdate = () => {
         this.checkPackageUpdates();
     }
 

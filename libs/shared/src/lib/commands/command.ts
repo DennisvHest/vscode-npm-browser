@@ -10,6 +10,7 @@ export class CommandTypes {
     static readonly fetchPackage = 'fetch-package';
     static readonly fetchPackageComplete = 'fetch-package-complete';
     static readonly npmOutdated = 'npm-outdated';
+    static readonly npmUpdate = 'npm-update';
     
     static readonly packageJsonSelected = 'package-json-selected';
     static readonly packageJsonUpdated = 'package-json-updated';

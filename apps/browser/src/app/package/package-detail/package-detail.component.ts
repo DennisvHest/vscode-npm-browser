@@ -82,7 +82,10 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
         return npmPackage != null && packageChanged;
       }),
     ).subscribe(([npmPackage, _packageUpdates]) => {
-      const updatesForPackage = _packageUpdates[npmPackage.name];
+      let updatesForPackage = null;
+      
+      if (_packageUpdates)
+        updatesForPackage = _packageUpdates[npmPackage.name];
 
       this.packageInstallForm.patchValue({
         version: updatesForPackage ? updatesForPackage.wanted.version : npmPackage.distTags.latest
