@@ -76,6 +76,8 @@ export class NPMTerminal {
 
         this._packageJsonFileWatcher.onDidChange(this.onPackageJsonFileChanged);
         this._packageJsonFileWatcher.onDidDelete(this.onPackageJsonFileDeleted);
+
+        this.checkPackageUpdates();
     }
 
     private onPackageJsonsChanged = (uri: vscode.Uri) => {
@@ -211,8 +213,10 @@ export class NPMTerminal {
     }
 
     private afterNpmOutdatedCommand = (success: boolean, result?: any) => {
-        if (!success)
+        if (!success || !result || result.error) {
             this._packageUpdates$.next({});
+            return;
+        }
 
         for (let packageName of Object.keys(result)) {
             result[packageName] = new PackageUpdatesItem(result[packageName]);
@@ -259,7 +263,7 @@ export class NPMTerminal {
         vscode.tasks.onDidEndTaskProcess((event) => {
             if (event.execution.task.name === task.name && event.exitCode !== 0) {
                 this.completeCommand(false);
-            } else if (this._currentCommand) {
+            } else if (this._currentCommand && this._currentCommand === command) {
                 this.completeCommand(true);
             }
         });

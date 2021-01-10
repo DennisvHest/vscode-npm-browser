@@ -78,7 +78,6 @@ export function activate(context: vscode.ExtensionContext) {
 			return;
 
 		reinitializeBrowser();
-		npmTerminal.checkPackageUpdates();
 	});
 
 	function onValueCommand(command: ValueCommand) {

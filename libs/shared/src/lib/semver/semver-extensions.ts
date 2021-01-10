@@ -1,7 +1,10 @@
 import * as semver from 'semver';
 
 export function applyRangeOptions(version: string, updateLevel: number): semver.Range {
-    version = semver.coerce(version)!.raw;
+    let parsedVersion = semver.parse(version, { includePrerelease: true }).raw;
+
+    if (!parsedVersion)
+        parsedVersion = semver.coerce(version, { includePrerelease: true })!.raw;
 
     let prefix = '';
 
