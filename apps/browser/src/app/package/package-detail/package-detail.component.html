@@ -13,7 +13,7 @@
             <form [formGroup]="packageInstallForm" (ngSubmit)="installPackage()">
                 <div class="d-flex">
                     <select formControlName="version" class="form-control">
-                        <option *ngFor="let version of npmPackage.versions.reverse()" [ngValue]="version.version">
+                        <option *ngFor="let version of npmPackage.versions" [ngValue]="version.version">
                             {{ version.version }}<ng-container *ngIf="version.distTags.length">
                                 ({{ version.distTags.join(', ') }})</ng-container>
                         </option>

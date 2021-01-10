@@ -96,6 +96,9 @@ export class PackageDetailComponent implements OnInit, OnDestroy {
       if (!npmPackage)
         return;
 
+      if (this.npmPackage !== npmPackage)
+        npmPackage.versions.reverse();
+
       this.npmPackage = npmPackage;
 
       this.packageInstallForm.patchValue({
