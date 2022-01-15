@@ -3,7 +3,7 @@
 - Make sure npm install is run once so that rollup has the required extensions
 - Make sure BrowserWebView with production = true
 - Build the browser and extension (browser in production configuration) (build extension: npm run build-extension)
-- Use rollup to package the javascript to one bundle.js file (rollup -c)
-- VSCode package.json needs to be located in the root of the dist folder with the main pointing to ./bundle.js
+- Use rollup to package the javascript to one bundle.js file (rollup -c) (in dist folder)
+- Extension package.json needs to be located in the root of the dist folder with the main pointing to ./bundle.js
 - Readme, icons and demo need to be copied to dist folder
-- vsce package runnen
+- run vsce package
