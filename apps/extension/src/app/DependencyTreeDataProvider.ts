@@ -35,11 +35,11 @@ export class DependencyTreeDataProvider implements vscode.TreeDataProvider<vscod
         this._packageJsonSubscription = combineLatest([this._packageJson$, this._packageUpdates$]).pipe(
             map(([packageJson, packageUpdates]): DependencyCollection => {
                 return {
-                    dependencies: Object.keys(packageJson.dependencies || {})
+                    dependencies: Object.keys(packageJson ? (packageJson.dependencies || {}) : {})
                         .map(dependency => ({ packageItem: { name: dependency, version: packageJson.dependencies[dependency] }, updates: packageUpdates[dependency] })),
-                    devDependencies: Object.keys(packageJson.devDependencies || {})
+                    devDependencies: Object.keys(packageJson ? (packageJson.devDependencies || {}) : {})
                         .map(dependency => ({ packageItem: { name: dependency, version: packageJson.devDependencies[dependency] }, updates: packageUpdates[dependency] })),
-                    optionalDependencies: Object.keys(packageJson.optionalDependencies || {})
+                    optionalDependencies: Object.keys(packageJson ? (packageJson.optionalDependencies || {}) : {})
                         .map(dependency => ({ packageItem: { name: dependency, version: packageJson.optionalDependencies[dependency] }, updates: packageUpdates[dependency] }))
                 }
             })
