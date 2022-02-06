@@ -117,7 +117,7 @@ export class BrowserWebView {
                     <npmb-root></npmb-root>
                     <script nonce="${nonce}">
                         const vscode = acquireVsCodeApi();
-                        const workspaceState = ${JSON.stringify(this._context.workspaceState['_value'])};
+                        const workspaceState = ${JSON.stringify(BrowserWebView.escapePackageJsonHtml(this._context.workspaceState['_value']))};
                         const assetPath = "${this._panel.webview.asWebviewUri(vscode.Uri.file(this._context.extensionPath))}/apps/extension/src/browser/assets/";
                     </script>
                     ${scripts.join('')}
@@ -143,5 +143,33 @@ export class BrowserWebView {
             text += possible.charAt(Math.floor(Math.random() * possible.length));
         }
         return text;
+    }
+
+    private static tagsToReplace = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;'
+    };
+    
+    private static replaceTag(tag) {
+        return BrowserWebView.tagsToReplace[tag] || tag;
+    }
+    
+    private static escapeHTML(str) {
+        return str.replace(/[&<>]/g, this.replaceTag);
+    }
+
+    private static escapePackageJsonHtml(workspaceState) {
+        const packageJsons = [ workspaceState.selectedPackageJson, ...workspaceState.packageJsons ];
+
+        for (let packageJson of packageJsons) {
+            if (packageJson.description)
+                packageJson.description = BrowserWebView.escapeHTML(packageJson.readme);
+
+            if (packageJson.readme)
+                packageJson.readme = BrowserWebView.escapeHTML(packageJson.readme);
+        }
+
+        return workspaceState;
     }
 }
