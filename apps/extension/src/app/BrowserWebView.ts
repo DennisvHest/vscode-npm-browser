@@ -163,6 +163,9 @@ export class BrowserWebView {
         const packageJsons = [ workspaceState.selectedPackageJson, ...workspaceState.packageJsons ];
 
         for (let packageJson of packageJsons) {
+            if (!packageJson)
+                continue;
+
             if (packageJson.description)
                 packageJson.description = BrowserWebView.escapeHTML(packageJson.readme);
 
