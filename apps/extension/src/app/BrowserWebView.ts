@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { TerminalCommand, Command, ValueCommand, VSCodeToastCommand } from '../../../../libs/shared/src/index';
+import * as https from 'https';
+import { TerminalCommand, Command, ValueCommand, VSCodeToastCommand, CommandTypes } from '../../../../libs/shared/src/index';
 
 export class BrowserWebView {
 
@@ -55,6 +56,11 @@ export class BrowserWebView {
 
         this._panel.webview.onDidReceiveMessage(
             command => {
+                if (command.type === CommandTypes.webRequestCommand) {
+                    this.onWebRequestCommand(command);
+                    return;
+                }
+
                 // Process command from webview
                 const commandListener = this.commandListeners[command.type];
 
@@ -174,5 +180,30 @@ export class BrowserWebView {
         }
 
         return workspaceState;
+    }
+
+    private onWebRequestCommand(command: ValueCommand) {
+        const _this = this;
+
+        const request = https.request(command.value.url, {
+              method: command.value.method,
+        }, response => {
+            if (response.statusCode < 200 || response.statusCode >= 300) {
+                response.resume();
+                return;
+            }
+
+            let responseText = '';
+
+            response.on('data', chunk => responseText += chunk);
+
+            response.on('close', () => {
+                var responseData = JSON.parse(responseText);
+
+                _this.sendCommand({ type: CommandTypes.webResponseCommand, value: responseData } as ValueCommand)
+            });
+        });
+
+        request.end();
     }
 }

@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { PackageSearchResult } from '../model/package-search-result.model';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpRequest } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { Package } from '../model/package.model';
-import { map, tap, catchError, withLatestFrom, take } from 'rxjs/operators';
+import { map, tap, catchError, withLatestFrom, take, filter } from 'rxjs/operators';
 import { ApplicationState } from '../state';
 import { Store } from '@ngrx/store';
 import { packageSearchResultChanged, packageSearchQueryChanged } from '../state/state.actions';
 import { VSCodeService } from '../vscode/vscode.service';
-import { VSCodeToastCommand, ToastLevels, NpmViewCommand } from 'libs/shared/src';
+import { VSCodeToastCommand, ToastLevels, NpmViewCommand, ValueCommand, CommandTypes } from 'libs/shared/src';
 import { getFetchedPackage } from '../state/state.selectors';
 
 @Injectable({
@@ -47,16 +47,22 @@ export class PackageService {
   }
 
   mapFetchedPackage(npmViewPackage: any): Observable<Package> {
-    const registryRequest = this.http.get<any>(`${this.baseUrl}/${npmViewPackage.name}`).pipe(
-      catchError((error) => {
-        if (error.status !== 404)
-          this.reportRequestError(error);
+    // const registryRequest = this.http.get<any>(`${this.baseUrl}/${npmViewPackage.name}`).pipe(
+    //   catchError((error) => {
+    //     if (error.status !== 404)
+    //       this.reportRequestError(error);
 
-        return of(null);
-      })
-    );
+    //     return of(null);
+    //   })
+    // );
+
+    const registryRequest = this.vsCodeService.postWebRequestCommand({
+      type: CommandTypes.webRequestCommand,
+      value: new HttpRequest('GET', `${this.baseUrl}/${npmViewPackage.name}`)
+    } as ValueCommand);
 
     return registryRequest.pipe(
+      filter(registryPackage => registryPackage != null),
       map(registryPackage => {
         npmViewPackage.distTags = npmViewPackage['dist-tags'];
 
