@@ -10,7 +10,6 @@ import { AppComponent } from './app.component';
 import { SearchComponent } from './package/search/search.component';
 import { PackageListComponent } from './package/package-list/package-list.component';
 import { PackageDetailComponent } from './package/package-detail/package-detail.component';
-import { CorsInterceptor } from './interceptors/cors.interceptor';
 import { StoreModule } from '@ngrx/store';
 import { reducers, initialState } from './state';
 import { EffectsModule } from '@ngrx/effects';
@@ -52,13 +51,6 @@ import { IsLessThanPipe } from './pipes/is-less-than.pipe';
     MarkdownModule.forRoot(),
     ReactiveFormsModule,
     FontAwesomeModule
-  ],
-  providers: [
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: CorsInterceptor,
-      multi: true
-    }
   ],
   bootstrap: [AppComponent]
 })
