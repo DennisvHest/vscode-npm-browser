@@ -63,7 +63,7 @@ export class NPMTerminal {
         return this._packageJson!.filePath.replace(/package\.json$/, '');
     }
 
-    setPackageJson = (packageJson: PackageJson) => {
+    setPackageJson = (packageJson: PackageJson, refreshUpdates = true) => {
         this._packageJson$.next(packageJson);
 
         if (this._packageJsonFileWatcher)
@@ -77,7 +77,8 @@ export class NPMTerminal {
         this._packageJsonFileWatcher.onDidChange(this.onPackageJsonFileChanged);
         this._packageJsonFileWatcher.onDidDelete(this.onPackageJsonFileDeleted);
 
-        this.checkPackageUpdates();
+        if (refreshUpdates)
+            this.checkPackageUpdates();
     }
 
     private onPackageJsonsChanged = (uri: vscode.Uri) => {
@@ -156,13 +157,13 @@ export class NPMTerminal {
         });
     }
 
-    async reloadPackageJson() {
+    async reloadPackageJson(refreshUpdates = true) {
         if (this._packageJson) {
             try {
                 const currentPackageJson = await this.loadPackageJson(this._packageJson!.filePath);
-                this.setPackageJson(currentPackageJson);
+                this.setPackageJson(currentPackageJson, refreshUpdates);
             } catch (error) {
-                this.setPackageJson(null);
+                this.setPackageJson(null, refreshUpdates);
             }
         }
     }

@@ -21,7 +21,7 @@ export function activate(context: vscode.ExtensionContext) {
 	if (selectedPackageJson)
 		npmTerminal.setPackageJson(selectedPackageJson);
 
-	function reinitializeBrowser() {
+	function reinitializeBrowser(refreshUpdates = true) {
 		if (!browser || !browser.isOpen) {
 			browser = new BrowserWebView(context, false);
 		} else {
@@ -51,11 +51,11 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 
 		npmTerminal.findPackageJsons();
-		npmTerminal.reloadPackageJson();
+		npmTerminal.reloadPackageJson(refreshUpdates);
 	}
 
 	openPackageDetailCommandRegistration = vscode.commands.registerCommand('npm-browser.open-package-detail', (packageName: string) => {
-		reinitializeBrowser();
+		reinitializeBrowser(false);
 
 		const command: ValueCommand = { type: CommandTypes.installedPackageSelected, value: packageName };
 		browser.sendCommand(command);
