@@ -2,7 +2,6 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as https from 'https';
 import { TerminalCommand, Command, ValueCommand, VSCodeToastCommand, CommandTypes } from '../../../../libs/shared/src/index';
-
 export class BrowserWebView {
 
     private _context: vscode.ExtensionContext;
@@ -190,6 +189,7 @@ export class BrowserWebView {
         }, response => {
             if (response.statusCode < 200 || response.statusCode >= 300) {
                 response.resume();
+                _this.sendCommand({ type: CommandTypes.webResponseCommand, value: { status: response.statusCode } } as ValueCommand);
                 return;
             }
 
@@ -200,7 +200,7 @@ export class BrowserWebView {
             response.on('close', () => {
                 var responseData = JSON.parse(responseText);
 
-                _this.sendCommand({ type: CommandTypes.webResponseCommand, value: responseData } as ValueCommand)
+                _this.sendCommand({ type: CommandTypes.webResponseCommand, value: { ...responseData, status: response.statusCode } } as ValueCommand);
             });
         });
 

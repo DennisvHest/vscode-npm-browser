@@ -76,6 +76,9 @@ export class PackageService {
           return version;
         });
 
+        if (typeof npmViewPackage.author === 'object' && npmViewPackage.author !== null)
+          npmViewPackage.author = '';
+
         npmViewPackage.author = { name: npmViewPackage.author };
 
         const returnNpmPackage = npmViewPackage as Package;
@@ -83,7 +86,7 @@ export class PackageService {
         if (!returnNpmPackage.author)
           returnNpmPackage.author = null;
 
-        if (registryPackage) {
+        if (registryPackage && registryPackage.status === 200) {
           const versions = Object.keys(registryPackage.versions);
 
           const latestVersion = registryPackage.versions[versions[versions.length - 1]];
